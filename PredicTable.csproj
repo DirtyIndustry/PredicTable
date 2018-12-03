@@ -135,21 +135,6 @@
     <Content Include="Ascx\TempImage\山东海洋环境旬预报.doc.png" />
     <Content Include="Ascx\TempImage\山东海洋环境月预报.doc.png" />
     <Content Include="Ascx\XunModel.ascx" />
-    <Content Include="bin\ICSharpCode.SharpZipLib.dll" />
-    <Content Include="bin\Interop.Microsoft.Office.Core.dll" />
-    <Content Include="bin\LitJSON.dll" />
-    <Content Include="bin\Microsoft.Office.Interop.Word.dll" />
-    <Content Include="bin\Microsoft.Vbe.Interop.dll" />
-    <Content Include="bin\Newtonsoft.Json.dll" />
-    <Content Include="bin\NPOI.dll" />
-    <Content Include="bin\O2S.Components.PDFRender4NET.dll" />
-    <Content Include="bin\office.dll" />
-    <Content Include="bin\PageOffice.dll" />
-    <Content Include="bin\PredicTable.dll" />
-    <Content Include="bin\PredicTable.pdb" />
-    <Content Include="bin\stdole.dll" />
-    <Content Include="bin\WebWord.dll" />
-    <Content Include="bin\新建文件夹\Microsoft.Office.Interop.Word.dll" />
     <Content Include="ChangeRecord.aspx" />
     <Content Include="CheckTideData.aspx" />
     <Content Include="Contects.aspx" />
@@ -1226,12 +1211,6 @@
     <Content Include="MediumAndLongQuery.aspx" />
     <Content Include="NewMediumAndLong.aspx" />
     <Content Include="NineteenthTable.aspx" />
-    <Content Include="obj\Debug\PredicTable.csproj.FileListAbsolute.txt" />
-    <Content Include="obj\Debug\PredicTable.dll" />
-    <Content Include="obj\Debug\PredicTable.pdb" />
-    <Content Include="obj\Release\PredicTable.csproj.FileListAbsolute.txt" />
-    <Content Include="obj\Release\PredicTable.dll" />
-    <Content Include="obj\Release\PredicTable.pdb" />
     <Content Include="OceanRanchList.aspx" />
     <Content Include="pageoffice\doc\newoplonger\YB_GLB_HJ_1yr_20160818_SDMF.doc" />
     <Content Include="pageoffice\doc\newoplonger\YB_GLB_HJ_24hr_20160401_NMFC.doc" />
@@ -1640,8 +1619,6 @@
     <Content Include="Ajax\oprationword.ashx" />
     <Content Include="Ajax\JXHYBCX.ashx" />
     <Content Include="Ajax\YCYB.ashx" />
-    <Content Include="bin\PredicTable.dll.config" />
-    <Content Include="bin\WebWord.dll.config" />
     <Content Include="Ajax\UploadLongerWorddate.ashx" />
     <Content Include="Ajax\getGZPTDate.ashx" />
     <Content Include="download\show.doc" />
@@ -1656,7 +1633,6 @@
     <Content Include="pageoffice\doc\newoplonger\2016年8月及上旬预报-南堡油田.doc" />
     <Content Include="Ajax\UpLoadModelInfo.ashx" />
     <Content Include="Ajax\UpLoadModelInfo.ashx" />
-    <Content Include="obj\Release\DesignTimeResolveAssemblyReferencesInput.cache" />
     <Content Include="Ajax\gettablelist.ashx" />
     <Content Include="pageoffice\doc\CN-MediumAndLong\上旬预报-东营环境预报.doc" />
     <Content Include="pageoffice\doc\CN-MediumAndLong\上旬预报-南堡油田.doc" />
@@ -3112,14 +3088,10 @@
   <ItemGroup>
     <Folder Include="aspnet_client\system_web\2_0_50727\" />
     <Folder Include="aspnet_client\system_web\4_0_30319\" />
-    <Folder Include="bin\pageoffice\" />
     <Folder Include="gzptfj\" />
     <Folder Include="html\" />
     <Folder Include="Images\JingBaoImg\ContentImg\" />
     <Folder Include="ModelImg\" />
-    <Folder Include="obj\Debug\TempPE\" />
-    <Folder Include="obj\Release\TempPE\" />
-    <Folder Include="obj\x64\Debug\" />
     <Folder Include="pageoffice\doc\MediumAndLong\" />
     <Folder Include="pageoffice\doc\oplonger\" />
     <Folder Include="PublishedTemplate\" />
