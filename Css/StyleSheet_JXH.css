@@ -1,0 +1,31 @@
+﻿body {
+  width:97%;
+  height:500px;
+
+
+}
+
+#table tr  {
+     text-align:center;   
+}
+#table th  {
+     text-align:center;   
+} 
+#table {
+    height:400px; 
+
+}
+#ybfbsj {
+  margin:50px auto 50px auto;
+position:center;
+width:550px;
+}
+#dg{
+      margin:0 auto 0 auto;
+      position:center;
+      text-align:center;
+      width:100%;
+}
+#ybfbsj {
+    padding-top:10px;
+}

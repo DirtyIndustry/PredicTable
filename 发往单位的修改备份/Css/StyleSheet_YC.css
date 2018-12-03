@@ -1,0 +1,59 @@
+﻿body {
+  width:97% ;
+  height:800px;
+ 
+
+}
+ 
+/*.datagrid-header-over {
+    text-align:center;
+}
+.datagrid-header-row {
+
+    text-align:center;
+}*/
+#table {
+    height:300px; 
+   
+}
+#table tr  {
+     text-align:center;   
+}
+#table th  {
+     text-align:center;   
+}
+#table1 tr  {
+     text-align:center;   
+}
+#table1 th  {
+     text-align:center;   
+}
+#table1 {
+    height:300px; 
+   
+}
+#ybfbsj {
+  margin:5px auto 5px auto;
+position:center;
+width:550px;
+ padding-top:10px;
+}
+#dg{
+      margin:0 auto 0 auto;
+      position:center;
+      text-align:center;
+    width:100%;
+}
+
+#dg1{
+      margin:0 auto 0 auto;
+      position:center;
+      text-align:center;
+     width:100%;
+}
+#ycyb {
+  margin:5px auto 5px auto;
+position:center;
+width:550px;
+ padding-top:10px;
+}
