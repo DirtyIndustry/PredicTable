@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.Common;
-using System.Data.OracleClient;
+using System.Data.OleDb;
 using System.Reflection;
 using System.Text;
 using System.Web.Services;
@@ -898,16 +898,13 @@ namespace PredicTable
         #region 上午短期预报 存储方法
         private string setAmShort1(string type, string datajson)
         {
-            System.Diagnostics.Debug.WriteLine("setAmShort1()");
-            string result = "execute setAmShort1";
+            ModelEditResponse result = new ModelEditResponse();
             int executioncount = 0;
             if ((type == "fl" | type == "sw") & datajson != "")
             {
-                System.Diagnostics.Debug.WriteLine("    type is fl or sw and datajson is not empty.");
                 List<ModelAmShort1> datalist = JsonConvert.DeserializeObject<List<ModelAmShort1>>(datajson);
                 if (datalist.Count > 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("    datajson can be converted to list.");
                     DateTime pubdate = datalist[0].PUBLISHDATE;
                     string sqlselect = "select * from Tblyrbhwindwave72hforecasttwo "
                         + " where FORECASTDATE > to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')"
@@ -917,7 +914,6 @@ namespace PredicTable
                     string sql = "";
                     if (dtselect.Rows.Count > 0)
                     {
-                        System.Diagnostics.Debug.WriteLine("    do update.");
                         // Update
                         sql = "UPDATE TBLYRBHWINDWAVE72HFORECASTTWO set ";
                         switch (type)
@@ -934,7 +930,6 @@ namespace PredicTable
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine("    do insert.");
                         // Insert
                         sql = "INSERT INTO TBLYRBHWINDWAVE72HFORECASTTWO ";
                         switch (type)
@@ -950,16 +945,27 @@ namespace PredicTable
                             default: break;
                         }
                     }
-                    System.Diagnostics.Debug.WriteLine("    execute sql.");
                     foreach (ModelAmShort1 data in datalist)
                     {
-                        List<OracleParameter> dbParameters = buildParameters(data);
+                        List<DbParameter> dbParameters = buildParameters(data);
                         executioncount += executeSql(sql, dbParameters);
                     }
-                    result = "executed " + executioncount + " row(s).";
+                    if (executioncount == 6)
+                    {
+                        result.Success = true;
+                        result.AffectedRowCount = executioncount;
+                        bool newfake = false;
+                        List<ModelAmShort1> newdata = getAmShort1(pubdate, out newfake);
+                        result.NewFakeData = newfake;
+                        foreach(ModelAmShort1 model in newdata)
+                        {
+                            result.NewData.Add(model);
+                        }
+                    }
                 }
             }
-            return result;
+
+            return JsonConvert.SerializeObject(result);
         }
 
         #endregion
@@ -1019,21 +1025,14 @@ namespace PredicTable
         private DataTable queryData(string sql)
         {
             DataTable result = new DataTable();
-            string ConnectionStr = ConfigurationManager.ConnectionStrings["DataBaseCon"].ConnectionString;
-            DbProviderFactory Provider = DbProviderFactories.GetFactory(ConfigurationManager.ConnectionStrings["DataBaseCon"].ProviderName);
-            DbConnection conn = Provider.CreateConnection();
-            conn.ConnectionString = ConnectionStr;
-            DbCommand command = Provider.CreateCommand();
-            command.Connection = conn;
-            command.CommandText = sql;
-            DbDataAdapter ada = Provider.CreateDataAdapter();
+
+            string connstring = ConfigurationManager.ConnectionStrings["oleoracle"].ConnectionString;
+            OleDbConnection connection = new OleDbConnection(connstring);
+            OleDbDataAdapter adapter = new OleDbDataAdapter(sql, connection);
             try
             {
-                conn.Open();
-                ada.SelectCommand = command;
-                DataSet ds = new DataSet();
-                ada.Fill(ds, "tb");
-                result = ds.Tables["tb"];
+                connection.Open();
+                adapter.Fill(result);
             }
             catch(Exception e)
             {
@@ -1041,8 +1040,36 @@ namespace PredicTable
             }
             finally
             {
-                conn.Close();
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
             }
+
+            //string ConnectionStr = ConfigurationManager.ConnectionStrings["DataBaseCon"].ConnectionString;
+            //DbProviderFactory Provider = DbProviderFactories.GetFactory(ConfigurationManager.ConnectionStrings["DataBaseCon"].ProviderName);
+            //DbConnection conn = Provider.CreateConnection();
+            //conn.ConnectionString = ConnectionStr;
+            //DbCommand command = Provider.CreateCommand();
+            //command.Connection = conn;
+            //command.CommandText = sql;
+            //DbDataAdapter ada = Provider.CreateDataAdapter();
+            //try
+            //{
+            //    conn.Open();
+            //    ada.SelectCommand = command;
+            //    DataSet ds = new DataSet();
+            //    ada.Fill(ds, "tb");
+            //    result = ds.Tables["tb"];
+            //}
+            //catch(Exception e)
+            //{
+            //    System.Diagnostics.Debug.WriteLine(e);
+            //}
+            //finally
+            //{
+            //    conn.Close();
+            //}
             return result;
         }
 
@@ -1078,47 +1105,68 @@ namespace PredicTable
             return conn;
         }
 
-        private int executeSql(string sql, List<OracleParameter> parameters)
+        private int executeSql(string sql, List<DbParameter> parameters)
         {
             int result = 0;
-            string ConnectionStr = ConfigurationManager.ConnectionStrings["DataBaseCon"].ConnectionString;
-            DbProviderFactory Provider = DbProviderFactories.GetFactory(ConfigurationManager.ConnectionStrings["DataBaseCon"].ProviderName);
-            DbConnection conn = Provider.CreateConnection();
-            conn.ConnectionString = ConnectionStr;
-            DbCommand command = Provider.CreateCommand();
-            command.Connection = conn;
-            command.CommandType = CommandType.Text;
-            command.Parameters.Clear();
+
+            string connstring = ConfigurationManager.ConnectionStrings["oleoracle"].ConnectionString;
+            OleDbConnection connection = new OleDbConnection(connstring);
             for (int i = 0; i < parameters.Count; i++)
             {
                 sql = sql.Replace(parameters[i].ParameterName, parameters[i].Value.ToString());
             }
-            command.CommandText = sql;
+            OleDbCommand oleCmd = new OleDbCommand(sql, connection);
+            oleCmd.CommandType = CommandType.Text;
             try
             {
-                conn.Open();
-                foreach(DbParameter p in command.Parameters)
-                {
-                    System.Diagnostics.Debug.WriteLine(p.ParameterName + " : " + p.Value);
-                }
-                System.Diagnostics.Debug.WriteLine(command.CommandText);
-                result = command.ExecuteNonQuery();
+                connection.Open();
+                System.Diagnostics.Debug.WriteLine(oleCmd.CommandText);
+                result = oleCmd.ExecuteNonQuery();
+                System.Diagnostics.Debug.WriteLine(result);
             }
-            catch (OracleException e)
+            catch(Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e);
             }
             finally
             {
-                command.Dispose();
-                conn.Close();
+                connection.Close();
             }
+
+            //string ConnectionStr = ConfigurationManager.ConnectionStrings["DataBaseCon"].ConnectionString;
+            //DbProviderFactory Provider = DbProviderFactories.GetFactory(ConfigurationManager.ConnectionStrings["DataBaseCon"].ProviderName);
+            //DbConnection conn = Provider.CreateConnection();
+            //conn.ConnectionString = ConnectionStr;
+            //DbCommand command = Provider.CreateCommand();
+            //command.Connection = conn;
+            //command.CommandType = CommandType.Text;
+            //command.Parameters.Clear();
+            //for (int i = 0; i < parameters.Count; i++)
+            //{
+            //    sql = sql.Replace(parameters[i].ParameterName, parameters[i].Value.ToString());
+            //}
+            //command.CommandText = sql;
+            //try
+            //{
+            //    conn.Open();
+            //    System.Diagnostics.Debug.WriteLine(command.CommandText);
+            //    result = command.ExecuteNonQuery();
+            //}
+            //catch (Exception e)
+            //{
+            //    System.Diagnostics.Debug.WriteLine(e);
+            //}
+            //finally
+            //{
+            //    command.Dispose();
+            //    conn.Close();
+            //}
             return result;
         }
 
-        private List<OracleParameter> buildParameters<T>(T source) where T: class
+        private List<DbParameter> buildParameters<T>(T source) where T: class
         {
-            List<OracleParameter> result = new List<OracleParameter>();
+            List<DbParameter> result = new List<DbParameter>();
 
             string connectionStr = ConfigurationManager.ConnectionStrings["DataBaseCon"].ConnectionString;
             DbProviderFactory provider = DbProviderFactories.GetFactory(ConfigurationManager.ConnectionStrings["DataBaseCon"].ProviderName);
@@ -1126,17 +1174,17 @@ namespace PredicTable
             foreach (var prop in typeof(T).GetProperties())
             {
                 // System.Diagnostics.Debug.WriteLine(prop.PropertyType + " " + prop.Name + " : " + prop.GetValue(source, null));
-                OracleParameter parameter = new OracleParameter();
+                DbParameter parameter = provider.CreateParameter();
                 parameter.ParameterName = ":" + prop.Name;
-                parameter.Value = prop.GetValue(source, null);
                 if (prop.PropertyType == typeof(DateTime))
                 {
-                    parameter.OracleType = OracleType.DateTime;
+                    parameter.Value = ((DateTime)prop.GetValue(source, null)).ToString("yyyy-MM-dd HH:mm:ss");
                 }
                 else
                 {
-                    parameter.OracleType = OracleType.VarChar;
+                    parameter.Value = prop.GetValue(source, null);
                 }
+                
                 result.Add(parameter);
             }
             return result;

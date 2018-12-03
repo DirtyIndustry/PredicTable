@@ -3000,6 +3000,7 @@
     <Compile Include="WebServiceClass\ModelAmShort9.cs" />
     <Compile Include="WebServiceClass\ModelAmShortFakeData.cs" />
     <Compile Include="WebServiceClass\ModelAmShortResponse.cs" />
+    <Compile Include="WebServiceClass\ModelEditResponse.cs" />
     <Compile Include="WebServiceClass\ModelPublishMetaInfo.cs" />
     <Compile Include="WebServiceClass\SoapAddressReflector.cs" />
     <Compile Include="WebServices.asmx.cs">
