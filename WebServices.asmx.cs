@@ -54,8 +54,41 @@ namespace PredicTable
             string result = "";
             switch (tablenumber)
             {
+                case 0:
+                    result = setPublishMetaInfo(usertype, datajson);
+                    break;
                 case 1:
                     result = setAmShort1(usertype, datajson);
+                    break;
+                case 2:
+                    result = setAmShort2(usertype, datajson);
+                    break;
+                case 3:
+                case 4:
+                    break;
+                case 5:
+                    result = setAmShort5(usertype, datajson);
+                    break;
+                case 6:
+                    result = setAmShort6(usertype, datajson);
+                    break;
+                case 7:
+                    result = setAmShort7(usertype, datajson);
+                    break;
+                case 8:
+                    result = setAmShort8(usertype, datajson);
+                    break;
+                case 9:
+                    result = setAmShort9(usertype, datajson);
+                    break;
+                case 10:
+                    result = setAmShort10(usertype, datajson);
+                    break;
+                case 11:
+                    result = setAmShort11(usertype, datajson);
+                    break;
+                case 12:
+                    result = setAmShort12(usertype, datajson);
                     break;
                 default: break;
             }
@@ -90,7 +123,7 @@ namespace PredicTable
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return e.ToString();
             }
@@ -219,7 +252,7 @@ namespace PredicTable
             fakedata = fake;
             return result;
         }
-        
+
         // 上午二、72小时港口潮位预报
         private List<ModelAmShort2> getAmShort2(DateTime date, out bool fakedata)
         {
@@ -290,22 +323,45 @@ namespace PredicTable
             // 用天文潮数据补齐天数
             if (fake)
             {
-                string sqlastro = "select * from HT_YB_TIDE where STATION in ('113lko', '119hhg') and PREDICTIONDATE = to_date('"
+                string sqlastro = "select * from HT_YB_TIDE where STATION in ('113lko', '119hhg') and PREDICTIONDATE between to_date('"
+                    + publishdate.AddDays(1).ToString("yyyy/MM/dd") + "','yyyy/MM/dd') and to_date('"
                     + publishdate.AddDays(3).ToString("yyyy/MM/dd") + "','yyyy/MM/dd') ORDER BY STATION,PREDICTIONDATE";
                 DataTable dtastro = queryData(sqlastro);
                 if (dtastro.Rows.Count > 0)
                 {
-                    foreach (DataRow astrodata in dtastro.Rows)
+                    for (int i = 0; i < result.Count; i++)
                     {
-                        switch (astrodata["STATION"].ToString())
+                        if (result[i].HTLFIRSTTIMELOWTIDE == ""
+                            & result[i].HTLFIRSTWAVEOFTIME == ""
+                            & result[i].HTLFIRSTWAVETIDELEVEL == ""
+                            & result[i].HTLLOWTIDELEVELFORTHEFIRSTTIME == ""
+                            & result[i].HTLLOWTIDELEVELFORTHESECONDTIM == ""
+                            & result[i].HTLSECONDTIMELOWTIDE == ""
+                            & result[i].HTLSECONDWAVEOFTIME == ""
+                            & result[i].HTLSECONDWAVETIDELEVEL == "")
                         {
-                            case "113lko":
-                                fillModelAmShort2List(result, 2, astrodata);
-                                break;
-                            case "119hhg":
-                                fillModelAmShort2List(result, 5, astrodata);
-                                break;
-                            default: break;
+                            foreach (DataRow astrodata in dtastro.Rows)
+                            {
+                                if (result[i].FORECASTDATE.ToString("yyyy/MM/dd") == (Convert.ToDateTime(astrodata["PREDICTIONDATE"].ToString())).ToString("yyyy/MM/dd"))
+                                {
+                                    switch (astrodata["STATION"].ToString())
+                                    {
+                                        case "113lko":
+                                            if (result[i].HTLHARBOUR == "龙口港")
+                                            {
+                                                fillModelAmShort2List(result, i, astrodata);
+                                            }
+                                            break;
+                                        case "119hhg":
+                                            if (result[i].HTLHARBOUR == "黄河海港")
+                                            {
+                                                fillModelAmShort2List(result, i, astrodata);
+                                            }
+                                            break;
+                                        default: break;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -376,7 +432,7 @@ namespace PredicTable
                 DataTable dttemperature = queryData(sqltemperature);
                 if (dttemperature.Rows.Count > 0)
                 {
-                    for(int i = 0; i < dttemperature.Rows.Count; i++)
+                    for (int i = 0; i < dttemperature.Rows.Count; i++)
                     {
                         string location = dttemperature.Rows[i]["NAME"].ToString();
                         switch (location)
@@ -466,7 +522,7 @@ namespace PredicTable
             result.Add(new ModelAmShort6(pubdate, pubdate.AddDays(1), "新户"));
             string sql = "select * from TBL24HTIDELEVEL where PUBLISHDATE=to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
             DataTable dt = queryData(sql);
-            if(dt.Rows.Count > 0)
+            if (dt.Rows.Count > 0)
             {
                 List<ModelAmShort6> sqldatalist = TableToList<ModelAmShort6>(dt);
                 for (int i = 0; i < result.Count; i++)
@@ -490,7 +546,7 @@ namespace PredicTable
                 DataTable dtastro = queryData(sqlastro);
                 if (dtastro.Rows.Count > 0)
                 {
-                    foreach(DataRow astrodata in dtastro.Rows)
+                    foreach (DataRow astrodata in dtastro.Rows)
                     {
                         switch (astrodata["STATION"].ToString())
                         {
@@ -724,7 +780,7 @@ namespace PredicTable
                 DataTable dtwave = queryData(sqlwave);
                 if (dtwave.Rows.Count > 0)
                 {
-                    foreach(DataRow row in dtwave.Rows)
+                    foreach (DataRow row in dtwave.Rows)
                     {
                         switch (row["FORECASTAREA"].ToString())
                         {
@@ -962,7 +1018,7 @@ namespace PredicTable
                         bool newfake = false;
                         List<ModelAmShort1> newdata = getAmShort1(pubdate, out newfake);
                         result.NewFakeData = newfake;
-                        foreach(ModelAmShort1 model in newdata)
+                        foreach (ModelAmShort1 model in newdata)
                         {
                             result.NewData.Add(model);
                         }
@@ -1003,13 +1059,13 @@ namespace PredicTable
                     {
                         // Update
                         result.Description = "修改记录";
-                        sql = "UPDATE TBLHARBOURTIDELEVEL set HTLSECONDTIMELOWTIDE=@HTLSECONDTIMELOWTIDE, HTLLOWTIDELEVELFORTHESECONDTIM=@HTLLOWTIDELEVELFORTHESECONDTIM, HTLFIRSTWAVEOFTIME=@HTLFIRSTWAVEOFTIME, HTLFIRSTWAVETIDELEVEL=@HTLFIRSTWAVETIDELEVEL, HTLFIRSTTIMELOWTIDE=@HTLFIRSTTIMELOWTIDE, HTLLOWTIDELEVELFORTHEFIRSTTIME=@HTLLOWTIDELEVELFORTHEFIRSTTIME, HTLSECONDWAVEOFTIME=@HTLSECONDWAVEOFTIME, HTLSECONDWAVETIDELEVEL=@HTLSECONDWAVETIDELEVEL where PUBLISHDATE=to_date(@PUBLISHDATE,'yyyy-mm-dd hh24@mi@ss') and HTLHARBOUR=@HTLHARBOUR and FORECASTDATE=to_date(@FORECASTDATE,'yyyy-mm-dd hh24@mi@ss')";
+                        sql = "UPDATE TBLHARBOURTIDELEVEL set HTLSECONDTIMELOWTIDE='@HTLSECONDTIMELOWTIDE', HTLLOWTIDELEVELFORTHESECONDTIM='@HTLLOWTIDELEVELFORTHESECONDTIM', HTLFIRSTWAVEOFTIME='@HTLFIRSTWAVEOFTIME', HTLFIRSTWAVETIDELEVEL='@HTLFIRSTWAVETIDELEVEL', HTLFIRSTTIMELOWTIDE='@HTLFIRSTTIMELOWTIDE', HTLLOWTIDELEVELFORTHEFIRSTTIME='@HTLLOWTIDELEVELFORTHEFIRSTTIME', HTLSECONDWAVEOFTIME='@HTLSECONDWAVEOFTIME', HTLSECONDWAVETIDELEVEL='@HTLSECONDWAVETIDELEVEL' where PUBLISHDATE=to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss') and HTLHARBOUR='@HTLHARBOUR' and FORECASTDATE=to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss')";
                     }
                     else
                     {
                         // Insert
                         result.Description = "添加纪录";
-                        sql = "INSERT INTO TBLHARBOURTIDELEVEL (PUBLISHDATE, HTLSECONDTIMELOWTIDE, HTLLOWTIDELEVELFORTHESECONDTIM, HTLHARBOUR, FORECASTDATE, HTLFIRSTWAVEOFTIME, HTLFIRSTWAVETIDELEVEL, HTLFIRSTTIMELOWTIDE, HTLLOWTIDELEVELFORTHEFIRSTTIME, HTLSECONDWAVEOFTIME, HTLSECONDWAVETIDELEVEL) VALUES (to_date(@PUBLISHDATE,'yyyy-mm-dd hh24@mi@ss'), @HTLSECONDTIMELOWTIDE, @HTLLOWTIDELEVELFORTHESECONDTIM, @HTLHARBOUR, to_date(@FORECASTDATE,'yyyy-mm-dd hh24@mi@ss'), @HTLFIRSTWAVEOFTIME, @HTLFIRSTWAVETIDELEVEL, @HTLFIRSTTIMELOWTIDE, @HTLLOWTIDELEVELFORTHEFIRSTTIME, @HTLSECONDWAVEOFTIME, @HTLSECONDWAVETIDELEVEL)";
+                        sql = "INSERT INTO TBLHARBOURTIDELEVEL (PUBLISHDATE, HTLSECONDTIMELOWTIDE, HTLLOWTIDELEVELFORTHESECONDTIM, HTLHARBOUR, FORECASTDATE, HTLFIRSTWAVEOFTIME, HTLFIRSTWAVETIDELEVEL, HTLFIRSTTIMELOWTIDE, HTLLOWTIDELEVELFORTHEFIRSTTIME, HTLSECONDWAVEOFTIME, HTLSECONDWAVETIDELEVEL) VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), '@HTLSECONDTIMELOWTIDE', '@HTLLOWTIDELEVELFORTHESECONDTIM', '@HTLHARBOUR', to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss'), '@HTLFIRSTWAVEOFTIME', '@HTLFIRSTWAVETIDELEVEL', '@HTLFIRSTTIMELOWTIDE', '@HTLLOWTIDELEVELFORTHEFIRSTTIME', '@HTLSECONDWAVEOFTIME', '@HTLSECONDWAVETIDELEVEL')";
                     }
                     foreach (ModelAmShort2 model in datalist)
                     {
@@ -1074,14 +1130,14 @@ namespace PredicTable
                         switch (type)
                         {
                             case "fl":
-                                sql += " EFWWHHKSEAAREAWAVEHEIGHT=@EFWWHHKSEAAREAWAVEHEIGHT, EFWWGLGSEAAREAWAVEHEIGHT=@EFWWGLGSEAAREAWAVEHEIGHT, EFWWDYGWAVEHEIGHT=@EFWWDYGWAVEHEIGHT, EFWWXHWAVEHEIGHT=@EFWWXHWAVEHEIGHT, EFWWCKWAVEHEIGHT=@EFWWCKWAVEHEIGHT, EFWWBHLOWESTWAVE=@EFWWBHLOWESTWAVE, EFWWBHHIGHESTWAVE=@EFWWBHHIGHESTWAVE, EFWWBHWAVETYPE=@EFWWBHWAVETYPE, EFWWBHNORTHLOWESTWAVE=@EFWWBHNORTHLOWESTWAVE, EFWWBHNORTHHIGHESTWAVE=@EFWWBHNORTHHIGHESTWAVE, EFWWBHNORTHWAVETYPE=@EFWWBHNORTHWAVETYPE, EFWWDKSEAAREAWAVEHEIGHT=@EFWWDKSEAAREAWAVEHEIGHT ";
+                                sql += " EFWWHHKSEAAREAWAVEHEIGHT='@EFWWHHKSEAAREAWAVEHEIGHT', EFWWGLGSEAAREAWAVEHEIGHT='@EFWWGLGSEAAREAWAVEHEIGHT', EFWWDYGWAVEHEIGHT='@EFWWDYGWAVEHEIGHT', EFWWXHWAVEHEIGHT='@EFWWXHWAVEHEIGHT', EFWWCKWAVEHEIGHT='@EFWWCKWAVEHEIGHT', EFWWBHLOWESTWAVE='@EFWWBHLOWESTWAVE', EFWWBHHIGHESTWAVE='@EFWWBHHIGHESTWAVE', EFWWBHWAVETYPE='@EFWWBHWAVETYPE', EFWWBHNORTHLOWESTWAVE='@EFWWBHNORTHLOWESTWAVE', EFWWBHNORTHHIGHESTWAVE='@EFWWBHNORTHHIGHESTWAVE', EFWWBHNORTHWAVETYPE='@EFWWBHNORTHWAVETYPE', EFWWDKSEAAREAWAVEHEIGHT='@EFWWDKSEAAREAWAVEHEIGHT' ";
                                 break;
                             case "sw":
-                                sql += " EFWWHHKSEAAREAWATERTEMP=@EFWWHHKSEAAREAWATERTEMP, EFWWGLGSEAAREAWATERTEMP=@EFWWGLGSEAAREAWATERTEMP, EFWWDYGWATERTEMPERATURE=@EFWWDYGWATERTEMPERATURE, EFWWXHWATERTEMPERATURE=@EFWWXHWATERTEMPERATURE, EFWWCKWATERTEMPERATURE=@EFWWCKWATERTEMPERATURE, EFWWDKSEAAREAWATERTEMPE=@EFWWDKSEAAREAWATERTEMPE ";
+                                sql += " EFWWHHKSEAAREAWATERTEMP='@EFWWHHKSEAAREAWATERTEMP', EFWWGLGSEAAREAWATERTEMP='@EFWWGLGSEAAREAWATERTEMP', EFWWDYGWATERTEMPERATURE='@EFWWDYGWATERTEMPERATURE', EFWWXHWATERTEMPERATURE='@EFWWXHWATERTEMPERATURE', EFWWCKWATERTEMPERATURE='@EFWWCKWATERTEMPERATURE', EFWWDKSEAAREAWATERTEMPE='@EFWWDKSEAAREAWATERTEMPE' ";
                                 break;
                             default: break;
                         }
-                        sql += "where PUBLISHDATE=to_date(@PUBLISHDATE,'yyyy-mm-dd hh24@mi@ss')";
+                        sql += "where PUBLISHDATE=to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss')";
                     }
                     else
                     {
@@ -1092,11 +1148,11 @@ namespace PredicTable
                         {
                             case "fl":
                                 sql += "(PUBLISHDATE,EFWWHHKSEAAREAWAVEHEIGHT,EFWWGLGSEAAREAWAVEHEIGHT,EFWWDYGWAVEHEIGHT,EFWWXHWAVEHEIGHT,EFWWCKWAVEHEIGHT,EFWWBHLOWESTWAVE,EFWWBHHIGHESTWAVE,EFWWBHWAVETYPE,EFWWBHNORTHLOWESTWAVE,EFWWBHNORTHHIGHESTWAVE,EFWWBHNORTHWAVETYPE,EFWWDKSEAAREAWAVEHEIGHT) ";
-                                sql += "VALUES (to_date(@PUBLISHDATE,'yyyy-mm-dd hh24@mi@ss'),@EFWWHHKSEAAREAWAVEHEIGHT,@EFWWGLGSEAAREAWAVEHEIGHT,@EFWWDYGWAVEHEIGHT,@EFWWXHWAVEHEIGHT,@EFWWCKWAVEHEIGHT,@EFWWBHLOWESTWAVE,@EFWWBHHIGHESTWAVE,@EFWWBHWAVETYPE,@EFWWBHNORTHLOWESTWAVE,@EFWWBHNORTHHIGHESTWAVE,@EFWWBHNORTHWAVETYPE,@EFWWDKSEAAREAWAVEHEIGHT)";
+                                sql += "VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'),'@EFWWHHKSEAAREAWAVEHEIGHT','@EFWWGLGSEAAREAWAVEHEIGHT','@EFWWDYGWAVEHEIGHT','@EFWWXHWAVEHEIGHT','@EFWWCKWAVEHEIGHT','@EFWWBHLOWESTWAVE','@EFWWBHHIGHESTWAVE','@EFWWBHWAVETYPE','@EFWWBHNORTHLOWESTWAVE','@EFWWBHNORTHHIGHESTWAVE','@EFWWBHNORTHWAVETYPE','@EFWWDKSEAAREAWAVEHEIGHT')";
                                 break;
                             case "sw":
                                 sql += "(PUBLISHDATE, EFWWHHKSEAAREAWATERTEMP, EFWWGLGSEAAREAWATERTEMP, EFWWDYGWATERTEMPERATURE, EFWWXHWATERTEMPERATURE, EFWWCKWATERTEMPERATURE, EFWWDKSEAAREAWATERTEMPE) ";
-                                sql += "VALUES (to_date(@PUBLISHDATE, 'yyyy-mm-dd hh24@mi@ss'), @EFWWHHKSEAAREAWATERTEMP, @EFWWGLGSEAAREAWATERTEMP, @EFWWDYGWATERTEMPERATURE, @EFWWXHWATERTEMPERATURE, @EFWWCKWATERTEMPERATURE, @EFWWDKSEAAREAWATERTEMPE)";
+                                sql += "VALUES (to_date('@PUBLISHDATE', 'yyyy-mm-dd hh24@mi@ss'), '@EFWWHHKSEAAREAWATERTEMP', '@EFWWGLGSEAAREAWATERTEMP', '@EFWWDYGWATERTEMPERATURE', '@EFWWXHWATERTEMPERATURE', '@EFWWCKWATERTEMPERATURE', '@EFWWDKSEAAREAWATERTEMPE')";
                                 break;
                             default: break;
                         }
@@ -1114,6 +1170,610 @@ namespace PredicTable
                         List<ModelAmShort5> newdata = getAmShort5(pubdate, out newfake);
                         result.NewFakeData = newfake;
                         foreach (ModelAmShort5 model in newdata)
+                        {
+                            result.NewData.Add(model);
+                        }
+                    }
+                    else
+                    {
+                        result.Description = "未能写入数据库";
+                    }
+                }
+                else
+                {
+                    result.Description = "提交数据为空";
+                }
+            }
+            else
+            {
+                result.Description = "预报员类型不符";
+            }
+
+            return JsonConvert.SerializeObject(result);
+        }
+
+        // 上午六、24小时潮位预报
+        private string setAmShort6(string type, string datajson)
+        {
+            ModelEditResponse result = new ModelEditResponse();
+            int executioncount = 0;
+            // 判断输入参数 用户类型
+            if ((type == "cx") & datajson != "")
+            {
+                // 判断传入的数据有效性
+                List<ModelAmShort6> datalist = JsonConvert.DeserializeObject<List<ModelAmShort6>>(datajson);
+                if (datalist.Count > 0)
+                {
+                    // 判断数据库中是否已有该日期数据
+                    DateTime pubdate = datalist[0].PUBLISHDATE;
+                    string sqlselect = "select * from TBL24HTIDELEVEL where PUBLISHDATE=to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
+                    DataTable dtselect = queryData(sqlselect);
+                    string sql = "";
+                    if (dtselect.Rows.Count > 0)
+                    {
+                        // Update
+                        result.Description = "修改记录";
+                        sql = "UPDATE TBL24HTIDELEVEL set TLSECONDTIMELOWTIDE='@TLSECONDTIMELOWTIDE', TLLOWTIDELEVELFORTHESECONDTIME='@TLLOWTIDELEVELFORTHESECONDTIME', TLFIRSTWAVEOFTIME='@TLFIRSTWAVEOFTIME', TLFIRSTWAVETIDELEVEL='@TLFIRSTWAVETIDELEVEL', TLFIRSTTIMELOWTIDE='@TLFIRSTTIMELOWTIDE', TLLOWTIDELEVELFORTHEFIRSTTIME='@TLLOWTIDELEVELFORTHEFIRSTTIME', TLSECONDWAVEOFTIME='@TLSECONDWAVEOFTIME', TLSECONDWAVETIDELEVEL='@TLSECONDWAVETIDELEVEL' where PUBLISHDATE=to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss') and TLFORECASTSTANCE='@TLFORECASTSTANCE' and FORECASTDATE=to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss')";
+                    }
+                    else
+                    {
+                        // Insert
+                        result.Description = "新增记录";
+                        sql = "INSERT INTO TBL24HTIDELEVEL (PUBLISHDATE, TLSECONDTIMELOWTIDE, TLLOWTIDELEVELFORTHESECONDTIME, TLFORECASTSTANCE, FORECASTDATE, TLFIRSTWAVEOFTIME, TLFIRSTWAVETIDELEVEL, TLFIRSTTIMELOWTIDE, TLLOWTIDELEVELFORTHEFIRSTTIME, TLSECONDWAVEOFTIME, TLSECONDWAVETIDELEVEL) VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), '@TLSECONDTIMELOWTIDE', '@TLLOWTIDELEVELFORTHESECONDTIME', '@TLFORECASTSTANCE', to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss'), '@TLFIRSTWAVEOFTIME', '@TLFIRSTWAVETIDELEVEL', '@TLFIRSTTIMELOWTIDE', '@TLLOWTIDELEVELFORTHEFIRSTTIME', '@TLSECONDWAVEOFTIME', '@TLSECONDWAVETIDELEVEL')";
+                    }
+                    foreach (ModelAmShort6 data in datalist)
+                    {
+                        List<DbParameter> dbParameters = buildParameters(data);
+                        executioncount += executeSql(sql, dbParameters);
+                    }
+                    if (executioncount > 0)
+                    {
+                        result.Success = true;
+                        result.AffectedRowCount = executioncount;
+                        bool newfake = false;
+                        List<ModelAmShort6> newdata = getAmShort6(pubdate, out newfake);
+                        result.NewFakeData = newfake;
+                        foreach (ModelAmShort6 model in newdata)
+                        {
+                            result.NewData.Add(model);
+                        }
+                    }
+                    else
+                    {
+                        result.Description = "未能写入数据库";
+                    }
+                }
+                else
+                {
+                    result.Description = "提交数据为空";
+                }
+            }
+            else
+            {
+                result.Description = "预报员类型不符";
+            }
+
+            return JsonConvert.SerializeObject(result);
+        }
+
+        // 上午七、海上丝绸之路三天海浪、气象预报
+        private string setAmShort7(string type, string datajson)
+        {
+            ModelEditResponse result = new ModelEditResponse();
+            int executioncount = 0;
+            // 判断输入参数 用户类型
+            if ((type == "fl") & datajson != "")
+            {
+                // 判断传入的数据有效性
+                List<ModelAmShort7> datalist = JsonConvert.DeserializeObject<List<ModelAmShort7>>(datajson);
+                if (datalist.Count > 0)
+                {
+                    // 判断数据库中是否已有该日期数据
+                    DateTime pubdate = datalist[0].PUBLISHDATE;
+                    string sqlselect = "SELECT * FROM HT_SILKWINDWAVE "
+                        + " WHERE PUBLISHDATE=to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss') AND "
+                        + " FORECASTDATE BETWEEN to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')"
+                        + " AND  to_date('" + pubdate.AddDays(4).ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
+                    DataTable dtselect = queryData(sqlselect);
+                    string sql = "";
+                    if (dtselect.Rows.Count > 0)
+                    {
+                        // Update
+                        result.Description = "修改记录";
+                        sql = "UPDATE HT_SILKWINDWAVE set "
+                            + "YRBHWWFWAVEHEIGHT='@YRBHWWFWAVEHEIGHT', YRBHWWFWAVEDIR='@YRBHWWFWAVEDIR', YRBHWWFFLOWDIR='@YRBHWWFFLOWDIR', YRBHWWFFLOWLEVEL='@YRBHWWFFLOWLEVEL' "
+                            + "where PUBLISHDATE=to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss') and REPORTAREA='@REPORTAREA' and FORECASTDATE=to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss')";
+                    }
+                    else
+                    {
+                        // Insert
+                        result.Description = "新增记录";
+                        sql = "INSERT INTO HT_SILKWINDWAVE (PUBLISHDATE, REPORTAREA, FORECASTDATE, YRBHWWFWAVEHEIGHT, YRBHWWFWAVEDIR, YRBHWWFFLOWDIR, YRBHWWFFLOWLEVEL) VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), '@REPORTAREA', to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss'), '@YRBHWWFWAVEHEIGHT', '@YRBHWWFWAVEDIR', '@YRBHWWFFLOWDIR', '@YRBHWWFFLOWLEVEL')";
+                    }
+                    foreach (ModelAmShort7 data in datalist)
+                    {
+                        List<DbParameter> dbParameters = buildParameters(data);
+                        executioncount += executeSql(sql, dbParameters);
+                    }
+                    if (executioncount > 0)
+                    {
+                        result.Success = true;
+                        result.AffectedRowCount = executioncount;
+                        bool newfake = false;
+                        List<ModelAmShort7> newdata = getAmShort7(pubdate, out newfake);
+                        result.NewFakeData = newfake;
+                        foreach (ModelAmShort7 model in newdata)
+                        {
+                            result.NewData.Add(model);
+                        }
+                    }
+                    else
+                    {
+                        result.Description = "未能写入数据库";
+                    }
+                }
+                else
+                {
+                    result.Description = "提交数据为空";
+                }
+            }
+            else
+            {
+                result.Description = "预报员类型不符";
+            }
+
+            return JsonConvert.SerializeObject(result);
+        }
+
+        // 上午八、海上丝绸之路三天潮汐预报
+        private string setAmShort8(string type, string datajson)
+        {
+            ModelEditResponse result = new ModelEditResponse();
+            int executioncount = 0;
+            // 判断输入参数 用户类型
+            if ((type == "cx") & datajson != "")
+            {
+                // 判断传入的数据有效性
+                List<ModelAmShort8> datalist = JsonConvert.DeserializeObject<List<ModelAmShort8>>(datajson);
+                if (datalist.Count > 0)
+                {
+                    // 判断数据库中是否已有该日期数据
+                    DateTime pubdate = datalist[0].PUBLISHDATE;
+                    string sqlselect = "select * from HT_SILKTIDE where PUBLISHDATE=to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss') order by HTLHARBOUR,forecastdate asc";
+                    DataTable dtselect = queryData(sqlselect);
+                    string sql = "";
+                    if (dtselect.Rows.Count > 0)
+                    {
+                        // Update
+                        result.Description = "修改记录";
+                        sql = "UPDATE HT_SILKTIDE set HTLSECONDTIMELOWTIDE='@HTLSECONDTIMELOWTIDE', HTLLOWTIDELEVELFORTHESECONDTIM='@HTLLOWTIDELEVELFORTHESECONDTIM', HTLFIRSTWAVEOFTIME='@HTLFIRSTWAVEOFTIME', HTLFIRSTWAVETIDELEVEL='@HTLFIRSTWAVETIDELEVEL', HTLFIRSTTIMELOWTIDE='@HTLFIRSTTIMELOWTIDE', HTLLOWTIDELEVELFORTHEFIRSTTIME='@HTLLOWTIDELEVELFORTHEFIRSTTIME', HTLSECONDWAVEOFTIME='@HTLSECONDWAVEOFTIME', HTLSECONDWAVETIDELEVEL='@HTLSECONDWAVETIDELEVEL' where PUBLISHDATE=to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss') and HTLHARBOUR='@HTLHARBOUR' and FORECASTDATE=to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss')";
+                    }
+                    else
+                    {
+                        // Insert
+                        result.Description = "新增记录";
+                        sql = "INSERT INTO HT_SILKTIDE (PUBLISHDATE, HTLSECONDTIMELOWTIDE, HTLLOWTIDELEVELFORTHESECONDTIM, HTLHARBOUR, FORECASTDATE, HTLFIRSTWAVEOFTIME, HTLFIRSTWAVETIDELEVEL, HTLFIRSTTIMELOWTIDE, HTLLOWTIDELEVELFORTHEFIRSTTIME, HTLSECONDWAVEOFTIME, HTLSECONDWAVETIDELEVEL) VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), '@HTLSECONDTIMELOWTIDE', '@HTLLOWTIDELEVELFORTHESECONDTIM', '@HTLHARBOUR', to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss'), '@HTLFIRSTWAVEOFTIME', '@HTLFIRSTWAVETIDELEVEL', '@HTLFIRSTTIMELOWTIDE', '@HTLLOWTIDELEVELFORTHEFIRSTTIME', '@HTLSECONDWAVEOFTIME', '@HTLSECONDWAVETIDELEVEL')";
+                    }
+                    foreach (ModelAmShort8 data in datalist)
+                    {
+                        List<DbParameter> dbParameters = buildParameters(data);
+                        executioncount += executeSql(sql, dbParameters);
+                    }
+                    if (executioncount > 0)
+                    {
+                        result.Success = true;
+                        result.AffectedRowCount = executioncount;
+                        bool newfake = false;
+                        List<ModelAmShort8> newdata = getAmShort8(pubdate, out newfake);
+                        result.NewFakeData = newfake;
+                        foreach (ModelAmShort8 model in newdata)
+                        {
+                            result.NewData.Add(model);
+                        }
+                    }
+                    else
+                    {
+                        result.Description = "未能写入数据库";
+                    }
+                }
+                else
+                {
+                    result.Description = "提交数据为空";
+                }
+            }
+            else
+            {
+                result.Description = "预报员类型不符";
+            }
+
+            return JsonConvert.SerializeObject(result);
+        }
+
+        // 上午九、海区24小时海浪、水温预报
+        private string setAmShort9(string type, string datajson)
+        {
+            ModelEditResponse result = new ModelEditResponse();
+            int executioncount = 0;
+            // 判断输入参数 用户类型
+            if ((type == "fl" | type == "sw") & datajson != "")
+            {
+                // 判断传入的数据有效性
+                List<ModelAmShort9> datalist = JsonConvert.DeserializeObject<List<ModelAmShort9>>(datajson);
+                if (datalist.Count > 0)
+                {
+                    // 判断数据库中是否已有该日期数据
+                    DateTime pubdate = datalist[0].PUBLISHDATE;
+                    string sqlselect = "select * from HT_TBLWF24HWAVEFORECAST where PUBLISHDATE=to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
+                    DataTable dtselect = queryData(sqlselect);
+                    string sql = "";
+                    if (dtselect.Rows.Count > 0)
+                    {
+                        // Update
+                        result.Description = "修改记录";
+                        sql = "";
+                        sql = "UPDATE HT_TBLWF24HWAVEFORECAST set ";
+                        switch (type)
+                        {
+                            case "fl":
+                                sql += "SA24HWFBOHAIWAVEHEIGHT='@SA24HWFBOHAIWAVEHEIGHT', SA24HWFNORTHOFYSWAVEHEIGHT='@SA24HWFNORTHOFYSWAVEHEIGHT', SA24HWFMIDDLEOFYSWAVEHEIGHT='@SA24HWFMIDDLEOFYSWAVEHEIGHT', SA24HWFSOUTHOFYSWAVEHEIGHT='@SA24HWFSOUTHOFYSWAVEHEIGHT', SA24HWFOFFSHOREWAVEHEIGHT='@SA24HWFOFFSHOREWAVEHEIGHT' ";
+                                break;
+                            case "sw":
+                                sql += "SA24HWFOFFSHORESW='@SA24HWFOFFSHORESW' ";
+                                break;
+                            default: break;
+                        }
+                        sql += "where PUBLISHDATE=to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss')";
+                    }
+                    else
+                    {
+                        // Insert
+                        result.Description = "新增记录";
+                        sql = "";
+                        sql = "INSERT INTO HT_TBLWF24HWAVEFORECAST ";
+                        switch (type)
+                        {
+                            case "fl":
+                                sql += "(PUBLISHDATE, SA24HWFBOHAIWAVEHEIGHT, SA24HWFNORTHOFYSWAVEHEIGHT, SA24HWFMIDDLEOFYSWAVEHEIGHT, SA24HWFSOUTHOFYSWAVEHEIGHT, SA24HWFOFFSHOREWAVEHEIGHT) ";
+                                sql += "VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), '@SA24HWFBOHAIWAVEHEIGHT', '@SA24HWFNORTHOFYSWAVEHEIGHT', '@SA24HWFMIDDLEOFYSWAVEHEIGHT', '@SA24HWFSOUTHOFYSWAVEHEIGHT', '@SA24HWFOFFSHOREWAVEHEIGHT')";
+                                break;
+                            case "sw":
+                                sql += "(PUBLISHDATE, SA24HWFOFFSHORESW) ";
+                                sql += "VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), '@SA24HWFOFFSHORESW')";
+                                break;
+                            default: break;
+                        }
+                    }
+                    foreach (ModelAmShort9 data in datalist)
+                    {
+                        List<DbParameter> dbParameters = buildParameters(data);
+                        executioncount += executeSql(sql, dbParameters);
+                    }
+                    if (executioncount > 0)
+                    {
+                        result.Success = true;
+                        result.AffectedRowCount = executioncount;
+                        bool newfake = false;
+                        List<ModelAmShort9> newdata = getAmShort9(pubdate, out newfake);
+                        result.NewFakeData = newfake;
+                        foreach (ModelAmShort9 model in newdata)
+                        {
+                            result.NewData.Add(model);
+                        }
+                    }
+                    else
+                    {
+                        result.Description = "未能写入数据库";
+                    }
+                }
+                else
+                {
+                    result.Description = "提交数据为空";
+                }
+            }
+            else
+            {
+                result.Description = "预报员类型不符";
+            }
+
+            return JsonConvert.SerializeObject(result);
+        }
+
+        // 上午十、海阳海浪、水温预报
+        private string setAmShort10(string type, string datajson)
+        {
+            ModelEditResponse result = new ModelEditResponse();
+            int executioncount = 0;
+            // 判断输入参数 用户类型
+            if ((type == "fl" | type == "sw") & datajson != "")
+            {
+                // 判断传入的数据有效性
+                List<ModelAmShort10> datalist = JsonConvert.DeserializeObject<List<ModelAmShort10>>(datajson);
+                if (datalist.Count > 0)
+                {
+                    // 判断数据库中是否已有该日期数据
+                    DateTime pubdate = datalist[0].PUBLISHDATE;
+                    string sqlselect = "SELECT * FROM TBLYTWAVE WHERE PUBLISHDATE = to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
+                    DataTable dtselect = queryData(sqlselect);
+                    string sql = "";
+                    if (dtselect.Rows.Count > 0)
+                    {
+                        // Update
+                        result.Description = "修改记录";
+                        sql = "UPDATE TBLYTWAVE set ";
+                        switch (type)
+                        {
+                            case "fl":
+                                sql += "WAVELEVELONE='@WAVELEVELONE', WAVELEVELTYPE='@WAVELEVELTYPE', WAVEDIRECTION='@WAVEDIRECTION' ";
+                                break;
+                            case "sw":
+                                sql += "WATERTEMPERATURE='@WATERTEMPERATURE' ";
+                                break;
+                            default: break;
+                        }
+                        sql += "WHERE PUBLISHDATE=to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss')";
+                    }
+                    else
+                    {
+                        // Insert
+                        result.Description = "新增记录";
+                        sql = " (PUBLISHDATE,FORECASTDATE,WAVELEVELONE,WAVELEVELTYPE,WAVEDIRECTION,WATERTEMPERATURE)"
+                           + " VALUES"
+                           + " (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'),to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss'),'@WAVELEVELONE','@WAVELEVELTYPE','@WAVEDIRECTION','@WATERTEMPERATURE')";
+                        sql = "INSERT INTO TBLYTWAVE ";
+                        switch (type)
+                        {
+                            case "fl":
+                                sql += "(PUBLISHDATE, FORECASTDATE, WAVELEVELONE, WAVELEVELTYPE, WAVEDIRECTION) ";
+                                sql += "VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss'), '@WAVELEVELONE', '@WAVELEVELTYPE', '@WAVEDIRECTION')";
+                                break;
+                            case "sw":
+                                sql += "(PUBLISHDATE, FORECASTDATE, WATERTEMPERATURE) ";
+                                sql += "VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss'), '@WATERTEMPERATURE')";
+                                break;
+                            default: break;
+                        }
+                    }
+                    foreach (ModelAmShort10 data in datalist)
+                    {
+                        List<DbParameter> dbParameters = buildParameters(data);
+                        executioncount += executeSql(sql, dbParameters);
+                    }
+                    if (executioncount > 0)
+                    {
+                        result.Success = true;
+                        result.AffectedRowCount = executioncount;
+                        bool newfake = false;
+                        List<ModelAmShort10> newdata = getAmShort10(pubdate, out newfake);
+                        result.NewFakeData = newfake;
+                        foreach (ModelAmShort10 model in newdata)
+                        {
+                            result.NewData.Add(model);
+                        }
+                    }
+                    else
+                    {
+                        result.Description = "未能写入数据库";
+                    }
+                }
+                else
+                {
+                    result.Description = "提交数据为空";
+                }
+            }
+            else
+            {
+                result.Description = "预报员类型不符";
+            }
+
+            return JsonConvert.SerializeObject(result);
+        }
+
+        // 上午十一、海阳近岸海域潮汐预报
+        private string setAmShort11(string type, string datajson)
+        {
+            ModelEditResponse result = new ModelEditResponse();
+            int executioncount = 0;
+            // 判断输入参数 用户类型
+            if ((type == "cx") & datajson != "")
+            {
+                // 判断传入的数据有效性
+                List<ModelAmShort11> datalist = JsonConvert.DeserializeObject<List<ModelAmShort11>>(datajson);
+                if (datalist.Count > 0)
+                {
+                    // 判断数据库中是否已有该日期数据
+                    DateTime pubdate = datalist[0].PUBLISHDATE;
+                    string sqlselect = "SELECT * FROM TBLYTTIDE WHERE PUBLISHDATE = to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
+                    DataTable dtselect = queryData(sqlselect);
+                    string sql = "";
+                    if (dtselect.Rows.Count > 0)
+                    {
+                        // Update
+                        result.Description = "修改记录";
+                        sql = "UPDATE TBLYTTIDE SET FIRSTHIGHTIME='@FIRSTHIGHTIME', FIRSTHIGHLEVEL='@FIRSTHIGHLEVEL', FIRSTLOWTIME='@FIRSTLOWTIME', FIRSTLOWLEVEL='@FIRSTLOWLEVEL', SECONDHIGHTIME='@SECONDHIGHTIME', SECONDHIGHLEVEL='@SECONDHIGHLEVEL', SECONDLOWTIME='@SECONDLOWTIME', SECONDLOWLEVEL='@SECONDLOWLEVEL' WHERE PUBLISHDATE=to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss')";
+                    }
+                    else
+                    {
+                        // Insert
+                        result.Description = "新增记录";
+                        sql = "INSERT INTO TBLYTTIDE"
+                           + " (PUBLISHDATE,FORECASTDATE,FIRSTHIGHTIME,FIRSTHIGHLEVEL,FIRSTLOWTIME,FIRSTLOWLEVEL,SECONDHIGHTIME,SECONDHIGHLEVEL,SECONDLOWTIME,SECONDLOWLEVEL)"
+                           + " VALUES"
+                           + " (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss'), '@FIRSTHIGHTIME', '@FIRSTHIGHLEVEL', '@FIRSTLOWTIME', '@FIRSTLOWLEVEL', '@SECONDHIGHTIME', '@SECONDHIGHLEVEL', '@SECONDLOWTIME', '@SECONDLOWLEVEL')";
+                    }
+                    foreach (ModelAmShort11 data in datalist)
+                    {
+                        List<DbParameter> dbParameters = buildParameters(data);
+                        executioncount += executeSql(sql, dbParameters);
+                    }
+                    if (executioncount > 0)
+                    {
+                        result.Success = true;
+                        result.AffectedRowCount = executioncount;
+                        bool newfake = false;
+                        List<ModelAmShort11> newdata = getAmShort11(pubdate, out newfake);
+                        result.NewFakeData = newfake;
+                        foreach (ModelAmShort11 model in newdata)
+                        {
+                            result.NewData.Add(model);
+                        }
+                    }
+                    else
+                    {
+                        result.Description = "未能写入数据库";
+                    }
+                }
+                else
+                {
+                    result.Description = "提交数据为空";
+                }
+            }
+            else
+            {
+                result.Description = "预报员类型不符";
+            }
+
+            return JsonConvert.SerializeObject(result);
+        }
+
+        // 上午十二、海阳万米海滩海水浴场风、浪预报
+        private string setAmShort12(string type, string datajson)
+        {
+            ModelEditResponse result = new ModelEditResponse();
+            int executioncount = 0;
+            // 判断输入参数 用户类型
+            if ((type == "fl") & datajson != "")
+            {
+                // 判断传入的数据有效性
+                List<ModelAmShort12> datalist = JsonConvert.DeserializeObject<List<ModelAmShort12>>(datajson);
+                if (datalist.Count > 0)
+                {
+                    // 判断数据库中是否已有该日期数据
+                    DateTime pubdate = datalist[0].PUBLISHDATE;
+                    string sqlselect = "SELECT * FROM TBLYTYC WHERE PUBLISHDATE = to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
+                    DataTable dtselect = queryData(sqlselect);
+                    string sql = "";
+                    if (dtselect.Rows.Count > 0)
+                    {
+                        // Update
+                        result.Description = "修改记录";
+                        sql = "UPDATE TBLYTYC SET WEATERSTATE='@WEATERSTATE', TEMPERATURE='@TEMPERATURE', WINDSPEED='@WINDSPEED', WINDDIRECTION='@WINDDIRECTION', WAVEHEIGHT='@WAVEHEIGHT' WHERE PUBLISHDATE=to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss')";
+                    }
+                    else
+                    {
+                        // Insert
+                        result.Description = "新增记录";
+                        sql = "INSERT INTO TBLYTYC"
+                           + " (PUBLISHDATE, FORECASTDATE, WEATERSTATE, TEMPERATURE, WINDSPEED, WINDDIRECTION, WAVEHEIGHT)"
+                           + " VALUES"
+                           + " (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss'), '@WEATERSTATE', '@TEMPERATURE', '@WINDSPEED', '@WINDDIRECTION', '@WAVEHEIGHT')";
+                    }
+                    foreach (ModelAmShort12 data in datalist)
+                    {
+                        List<DbParameter> dbParameters = buildParameters(data);
+                        executioncount += executeSql(sql, dbParameters);
+                    }
+                    if (executioncount > 0)
+                    {
+                        result.Success = true;
+                        result.AffectedRowCount = executioncount;
+                        bool newfake = false;
+                        List<ModelAmShort12> newdata = getAmShort12(pubdate, out newfake);
+                        result.NewFakeData = newfake;
+                        foreach (ModelAmShort12 model in newdata)
+                        {
+                            result.NewData.Add(model);
+                        }
+                    }
+                    else
+                    {
+                        result.Description = "未能写入数据库";
+                    }
+                }
+                else
+                {
+                    result.Description = "提交数据为空";
+                }
+            }
+            else
+            {
+                result.Description = "预报员类型不符";
+            }
+
+            return JsonConvert.SerializeObject(result);
+        }
+
+        // 页脚 填报信息
+        private string setPublishMetaInfo(string type, string datajson)
+        {
+            ModelEditResponse result = new ModelEditResponse();
+            int executioncount = 0;
+            // 判断输入参数 用户类型
+            if ((type == "fl" | type == "sw" | type == "cx") & datajson != "")
+            {
+                // 判断传入的数据有效性
+                List<ModelPublishMetaInfo> datalist = JsonConvert.DeserializeObject<List<ModelPublishMetaInfo>>(datajson);
+                if (datalist.Count > 0)
+                {
+                    // 判断数据库中是否已有该日期数据
+                    DateTime pubdate = datalist[0].PUBLISHDATE;
+                    string sqlselect = "select * from TBLFOOTER where PUBLISHDATE=to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
+                    DataTable dtselect = queryData(sqlselect);
+                    string sql = "";
+                    if (dtselect.Rows.Count > 0)
+                    {
+                        // Update
+                        result.Description = "修改记录";
+                        sql = "UPDATE TBLFOOTER set ";
+                        switch (type)
+                        {
+                            case "fl":
+                                sql += "PUBLISHHOUR='@PUBLISHHOUR',FRELEASEUNIT='@FRELEASEUNIT',FTELEPHONE='@FTELEPHONE',FFAX='@FFAX',FWAVEFORECASTER='@FWAVEFORECASTER',FWAVEFORECASTERTEL='@FWAVEFORECASTERTEL',ZHIBANTEL='@ZHIBANTEL',SENDTEL='@SENDTEL' ";
+                                break;
+                            case "sw":
+                                sql += "PUBLISHHOUR='@PUBLISHHOUR',FRELEASEUNIT='@FRELEASEUNIT',FTELEPHONE='@FTELEPHONE',FFAX='@FFAX',FWATERTEMPERATUREFORECASTER='@FWATERTEMPERATUREFORECASTER',FWATERTEMPERATUREFORECASTERTEL='@FWATERTEMPERATUREFORECASTERTEL',ZHIBANTEL='@ZHIBANTEL',SENDTEL='@SENDTEL' ";
+                                break;
+                            case "cx":
+                                sql += "PUBLISHHOUR='@PUBLISHHOUR',FRELEASEUNIT='@FRELEASEUNIT',FTELEPHONE='@FTELEPHONE',FFAX='@FFAX',FTIDALFORECASTER='@FTIDALFORECASTER',FTIDALFORECASTERTEL='@FTIDALFORECASTERTEL',ZHIBANTEL='@ZHIBANTEL',SENDTEL='@SENDTEL' ";
+                                break;
+                            default: break;
+                        }
+                        sql += "where PUBLISHDATE=to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss')";
+                    }
+                    else
+                    {
+                        // Insert
+                        result.Description = "新增记录";
+                        sql = "INSERT INTO TBLFOOTER ";
+                        switch (type)
+                        {
+                            case "fl":
+                                sql += "(PUBLISHDATE,PUBLISHHOUR,FRELEASEUNIT,FTELEPHONE,FFAX,FWAVEFORECASTER,FWAVEFORECASTERTEL,ZHIBANTEL,SENDTEL) ";
+                                sql += "VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'),'@PUBLISHHOUR','@FRELEASEUNIT','@FTELEPHONE','@FFAX','@FWAVEFORECASTER','@FWAVEFORECASTERTEL','@ZHIBANTEL','@SENDTEL')";
+                                break;
+                            case "sw":
+                                sql += "(PUBLISHDATE,PUBLISHHOUR,FRELEASEUNIT,FTELEPHONE,FFAX,FWATERTEMPERATUREFORECASTER,FWATERTEMPERATUREFORECASTERTEL,ZHIBANTEL,SENDTEL) ";
+                                sql += "VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'),'@PUBLISHHOUR','@FRELEASEUNIT','@FTELEPHONE','@FFAX','@FWATERTEMPERATUREFORECASTER','@FWATERTEMPERATUREFORECASTERTEL','@ZHIBANTEL','@SENDTEL')";
+                                break;
+                            case "cx":
+                                sql += "(PUBLISHDATE,PUBLISHHOUR,FRELEASEUNIT,FTELEPHONE,FFAX,FTIDALFORECASTER,FTIDALFORECASTERTEL,ZHIBANTEL,SENDTEL) ";
+                                sql += "VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'),'@PUBLISHHOUR','@FRELEASEUNIT','@FTELEPHONE','@FFAX','@FTIDALFORECASTER','@FTIDALFORECASTERTEL','@ZHIBANTEL','@SENDTEL')";
+                                break;
+                            default: break;
+                        }
+                    }
+                    foreach (ModelPublishMetaInfo data in datalist)
+                    {
+                        List<DbParameter> dbParameters = buildParameters(data);
+                        executioncount += executeSql(sql, dbParameters);
+                    }
+                    if (executioncount > 0)
+                    {
+                        result.Success = true;
+                        result.AffectedRowCount = executioncount;
+                        bool newfake = false;
+                        List<ModelPublishMetaInfo> newdata = getPublishMetaInfo(pubdate, out newfake);
+                        result.NewFakeData = newfake;
+                        foreach (ModelPublishMetaInfo model in newdata)
                         {
                             result.NewData.Add(model);
                         }
@@ -1174,7 +1834,7 @@ namespace PredicTable
             {
                 result.Description = "预报员类型不符";
             }
-            
+
             return result;
         }
 
@@ -1235,7 +1895,7 @@ namespace PredicTable
         private DataTable queryData(string sql)
         {
             DataTable result = new DataTable();
-            
+
             string ConnectionStr = ConfigurationManager.ConnectionStrings["DataBaseCon"].ConnectionString;
             DbProviderFactory Provider = DbProviderFactories.GetFactory(ConfigurationManager.ConnectionStrings["DataBaseCon"].ProviderName);
             DbConnection conn = Provider.CreateConnection();
@@ -1279,7 +1939,7 @@ namespace PredicTable
                 adapter.Fill(dataset, "table");
                 result = dataset.Tables["table"];
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e);
             }
@@ -1298,7 +1958,7 @@ namespace PredicTable
         private int executeSql(string sql, List<DbParameter> parameters)
         {
             int result = 0;
-            
+
             string ConnectionStr = ConfigurationManager.ConnectionStrings["DataBaseCon"].ConnectionString;
             DbProviderFactory Provider = DbProviderFactories.GetFactory(ConfigurationManager.ConnectionStrings["DataBaseCon"].ProviderName);
             DbConnection conn = Provider.CreateConnection();
@@ -1330,7 +1990,7 @@ namespace PredicTable
             return result;
         }
 
-        private List<DbParameter> buildParameters<T>(T source) where T: class
+        private List<DbParameter> buildParameters<T>(T source) where T : class
         {
             List<DbParameter> result = new List<DbParameter>();
 
@@ -1344,13 +2004,13 @@ namespace PredicTable
                 parameter.ParameterName = "@" + prop.Name;
                 if (prop.PropertyType == typeof(DateTime))
                 {
-                    parameter.Value = ((DateTime)prop.GetValue(source, null)).ToString("yyyy-MM-dd HH:mm:ss");
+                    parameter.Value = ((DateTime)prop.GetValue(source, null)).ToString("yyyy-MM-dd");
                 }
                 else
                 {
                     parameter.Value = prop.GetValue(source, null);
                 }
-                
+
                 result.Add(parameter);
             }
             return result;
