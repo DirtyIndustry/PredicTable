@@ -1749,6 +1749,7 @@
     <Content Include="Ajax\NewMediumAndLongHBUploader.ashx" />
     <Content Include="packages.config" />
     <None Include="Properties\PublishProfiles\1234.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\qwer.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\JingBao\JingBao.js" />

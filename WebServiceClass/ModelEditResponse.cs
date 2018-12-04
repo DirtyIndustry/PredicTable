@@ -8,6 +8,7 @@ namespace PredicTable.WebServiceClass
     public class ModelEditResponse
     {
         public bool Success { get; set; } = false;
+        public string Description { get; set; } = "";
         public int AffectedRowCount { get; set; } = 0;
         public List<object> NewData { get; set; } = new List<object>();
         public bool NewFakeData { get; set; } = false;
