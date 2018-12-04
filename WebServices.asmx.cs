@@ -1139,6 +1139,7 @@ namespace PredicTable
         private ModelEditResponse submitTable<T>(string type, List<string> validtypes, string datajson, string selectsql, string executesql) where T : class
         {
             ModelEditResponse result = new ModelEditResponse();
+
             int executioncount = 0;
             // 判断输入参数 用户类型
             if (validtypes.Contains(type) & datajson != "")
