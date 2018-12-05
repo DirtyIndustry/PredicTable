@@ -284,7 +284,14 @@ namespace PredicTable
                         {
                             if (sqldata.HTLHARBOUR == result[i].HTLHARBOUR & sqldata.FORECASTDATE.ToString("yyyy/MM/dd") == result[i].FORECASTDATE.ToString("yyyy/MM/dd"))
                             {
-                                result[i] = sqldata;
+                                result[i].HTLFIRSTTIMELOWTIDE = sqldata.HTLFIRSTTIMELOWTIDE;
+                                result[i].HTLFIRSTWAVEOFTIME = sqldata.HTLFIRSTWAVEOFTIME;
+                                result[i].HTLFIRSTWAVETIDELEVEL = sqldata.HTLFIRSTWAVETIDELEVEL;
+                                result[i].HTLLOWTIDELEVELFORTHEFIRSTTIME = sqldata.HTLLOWTIDELEVELFORTHEFIRSTTIME;
+                                result[i].HTLLOWTIDELEVELFORTHESECONDTIM = sqldata.HTLLOWTIDELEVELFORTHESECONDTIM;
+                                result[i].HTLSECONDTIMELOWTIDE = sqldata.HTLSECONDTIMELOWTIDE;
+                                result[i].HTLSECONDWAVEOFTIME = sqldata.HTLSECONDWAVEOFTIME;
+                                result[i].HTLSECONDWAVETIDELEVEL = sqldata.HTLSECONDWAVETIDELEVEL;
                             }
                         }
                     }
@@ -314,7 +321,14 @@ namespace PredicTable
                         {
                             if (sqldata.HTLHARBOUR == result[i].HTLHARBOUR & sqldata.FORECASTDATE.ToString("yyyy/MM/dd") == result[i].FORECASTDATE.ToString("yyyy/MM/dd"))
                             {
-                                result[i] = sqldata;
+                                result[i].HTLFIRSTTIMELOWTIDE = sqldata.HTLFIRSTTIMELOWTIDE;
+                                result[i].HTLFIRSTWAVEOFTIME = sqldata.HTLFIRSTWAVEOFTIME;
+                                result[i].HTLFIRSTWAVETIDELEVEL = sqldata.HTLFIRSTWAVETIDELEVEL;
+                                result[i].HTLLOWTIDELEVELFORTHEFIRSTTIME = sqldata.HTLLOWTIDELEVELFORTHEFIRSTTIME;
+                                result[i].HTLLOWTIDELEVELFORTHESECONDTIM = sqldata.HTLLOWTIDELEVELFORTHESECONDTIM;
+                                result[i].HTLSECONDTIMELOWTIDE = sqldata.HTLSECONDTIMELOWTIDE;
+                                result[i].HTLSECONDWAVEOFTIME = sqldata.HTLSECONDWAVEOFTIME;
+                                result[i].HTLSECONDWAVETIDELEVEL = sqldata.HTLSECONDWAVETIDELEVEL;
                             }
                         }
                     }
@@ -616,7 +630,10 @@ namespace PredicTable
                     {
                         if (result[i].REPORTAREA == sqldata.REPORTAREA & result[i].FORECASTDATE.ToString("yyyy/MM/dd") == sqldata.FORECASTDATE.ToString("yyyy/MM/dd"))
                         {
-                            result[i] = sqldata;
+                            result[i].YRBHWWFFLOWDIR = sqldata.YRBHWWFFLOWDIR;
+                            result[i].YRBHWWFFLOWLEVEL = sqldata.YRBHWWFFLOWLEVEL;
+                            result[i].YRBHWWFWAVEDIR = sqldata.YRBHWWFWAVEDIR;
+                            result[i].YRBHWWFWAVEHEIGHT = sqldata.YRBHWWFWAVEHEIGHT;
                         }
                     }
                 }
@@ -697,7 +714,14 @@ namespace PredicTable
                     {
                         if (result[i].HTLHARBOUR == sqldata.HTLHARBOUR & result[i].FORECASTDATE.ToString("yyyy/MM/dd") == sqldata.FORECASTDATE.ToString("yyyy/MM/dd"))
                         {
-                            result[i] = sqldata;
+                            result[i].HTLFIRSTTIMELOWTIDE = sqldata.HTLFIRSTTIMELOWTIDE;
+                            result[i].HTLFIRSTWAVEOFTIME = sqldata.HTLFIRSTWAVEOFTIME;
+                            result[i].HTLFIRSTWAVETIDELEVEL = sqldata.HTLFIRSTWAVETIDELEVEL;
+                            result[i].HTLLOWTIDELEVELFORTHEFIRSTTIME = sqldata.HTLLOWTIDELEVELFORTHEFIRSTTIME;
+                            result[i].HTLLOWTIDELEVELFORTHESECONDTIM = sqldata.HTLLOWTIDELEVELFORTHESECONDTIM;
+                            result[i].HTLSECONDTIMELOWTIDE = sqldata.HTLSECONDTIMELOWTIDE;
+                            result[i].HTLSECONDWAVEOFTIME = sqldata.HTLSECONDWAVEOFTIME;
+                            result[i].HTLSECONDWAVETIDELEVEL = sqldata.HTLSECONDWAVETIDELEVEL;
                         }
                     }
                 }
@@ -942,7 +966,19 @@ namespace PredicTable
             }
             if (dt.Rows.Count > 0)
             {
-                result = TableToList<ModelPublishMetaInfo>(dt);
+                List<ModelPublishMetaInfo> sqldatalist = TableToList<ModelPublishMetaInfo>(dt);
+                result[0].FFAX = sqldatalist[0].FFAX;
+                result[0].FRELEASEUNIT = sqldatalist[0].FRELEASEUNIT;
+                result[0].FTELEPHONE = sqldatalist[0].FTELEPHONE;
+                result[0].FTIDALFORECASTER = sqldatalist[0].FTIDALFORECASTER;
+                result[0].FTIDALFORECASTERTEL = sqldatalist[0].FTIDALFORECASTERTEL;
+                result[0].FWATERTEMPERATUREFORECASTER = sqldatalist[0].FWATERTEMPERATUREFORECASTER;
+                result[0].FWATERTEMPERATUREFORECASTERTEL = sqldatalist[0].FWATERTEMPERATUREFORECASTERTEL;
+                result[0].FWAVEFORECASTER = sqldatalist[0].FWAVEFORECASTER;
+                result[0].FWAVEFORECASTERTEL = sqldatalist[0].FWAVEFORECASTERTEL;
+                result[0].PUBLISHHOUR = sqldatalist[0].PUBLISHHOUR;
+                result[0].SENDTEL = sqldatalist[0].SENDTEL;
+                result[0].ZHIBANTEL = sqldatalist[0].ZHIBANTEL;
             }
             fakedata = fake;
             return result;
@@ -1067,10 +1103,10 @@ namespace PredicTable
                         result.Description = "添加纪录";
                         sql = "INSERT INTO TBLHARBOURTIDELEVEL (PUBLISHDATE, HTLSECONDTIMELOWTIDE, HTLLOWTIDELEVELFORTHESECONDTIM, HTLHARBOUR, FORECASTDATE, HTLFIRSTWAVEOFTIME, HTLFIRSTWAVETIDELEVEL, HTLFIRSTTIMELOWTIDE, HTLLOWTIDELEVELFORTHEFIRSTTIME, HTLSECONDWAVEOFTIME, HTLSECONDWAVETIDELEVEL) VALUES (to_date('@PUBLISHDATE','yyyy-mm-dd hh24@mi@ss'), '@HTLSECONDTIMELOWTIDE', '@HTLLOWTIDELEVELFORTHESECONDTIM', '@HTLHARBOUR', to_date('@FORECASTDATE','yyyy-mm-dd hh24@mi@ss'), '@HTLFIRSTWAVEOFTIME', '@HTLFIRSTWAVETIDELEVEL', '@HTLFIRSTTIMELOWTIDE', '@HTLLOWTIDELEVELFORTHEFIRSTTIME', '@HTLSECONDWAVEOFTIME', '@HTLSECONDWAVETIDELEVEL')";
                     }
-                    foreach (ModelAmShort2 model in datalist)
+                    foreach (ModelAmShort2 data in datalist)
                     {
-                        List<DbParameter> parameters = buildParameters(model);
-                        executionCount += executeSql(sql, parameters);
+                        List<DbParameter> dbParameters = buildParameters(data);
+                        executionCount += executeSql(sql, dbParameters);
                     }
                     if (executionCount > 0)
                     {
@@ -1969,9 +2005,23 @@ namespace PredicTable
             command.Parameters.Clear();
             for (int i = 0; i < parameters.Count; i++)
             {
-                sql = sql.Replace(parameters[i].ParameterName, parameters[i].Value.ToString());
+                //if (sql.Contains("'" + parameters[i].ParameterName + "'"))
+                //{
+                //    string oldname = parameters[i].ParameterName;
+                //    string newname = oldname.Replace("@", ":");
+                //    parameters[i].ParameterName = oldname.Replace("@", "");
+                //    sql = sql.Replace("'" + oldname + "'", "'" + newname + "'");
+                //    command.Parameters.Add(parameters[i]);
+                //}
+                sql = sql.Replace("'" + parameters[i].ParameterName + "'", "'" + parameters[i].Value.ToString() + "'");
             }
             command.CommandText = sql;
+
+            foreach(DbParameter p in command.Parameters)
+            {
+                System.Diagnostics.Debug.WriteLine(p.ParameterName + ": " + p.Value);
+            }
+
             try
             {
                 conn.Open();
@@ -2001,17 +2051,24 @@ namespace PredicTable
             {
                 // System.Diagnostics.Debug.WriteLine(prop.PropertyType + " " + prop.Name + " : " + prop.GetValue(source, null));
                 DbParameter parameter = provider.CreateParameter();
+                // OracleParameter p = new OracleParameter();
                 parameter.ParameterName = "@" + prop.Name;
+                // p.ParameterName = "@" + prop.Name;
                 if (prop.PropertyType == typeof(DateTime))
                 {
                     parameter.Value = ((DateTime)prop.GetValue(source, null)).ToString("yyyy-MM-dd");
+                    // p.OracleType = OracleType.VarChar;
+                    // p.Value = ((DateTime)prop.GetValue(source, null)).ToString("yyyy-MM-dd");
                 }
                 else
                 {
-                    parameter.Value = prop.GetValue(source, null);
+                    parameter.Value = (string)prop.GetValue(source, null);
+                    // p.OracleType = OracleType.VarChar;
+                    // p.Value = (string)prop.GetValue(source, null);
                 }
 
                 result.Add(parameter);
+                // result.Add(p);
             }
             return result;
         }
