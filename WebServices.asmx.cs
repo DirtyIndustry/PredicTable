@@ -1,10 +1,14 @@
 ﻿using Newtonsoft.Json;
 using PredicTable.WebServiceClass;
+using Spire.Doc;
+using Spire.Doc.Documents;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.Common;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Web.Services;
@@ -24,7 +28,7 @@ namespace PredicTable
         private delegate object GetTableMethod(DateTime date, List<bool> fakedatalist, int fakedataindex);
 
         [WebMethod]
-        public string GetTableData(DateTime date)
+        public string GetAmShortTableData(DateTime date)
         {
             ModelAmShortResponse result = new ModelAmShortResponse();
             result.AmShort1Data = getAmShort1(date, result.AmShortFakeData, 0);
@@ -98,15 +102,57 @@ namespace PredicTable
         }
 
         [WebMethod]
+        public string GetAmShortReportStatus(DateTime publishdate, string datajson)
+        {
+            List<ModelAmShortReport> reportlist = new List<ModelAmShortReport>();
+            if (datajson != "")
+            {
+                reportlist = JsonConvert.DeserializeObject<List<ModelAmShortReport>>(datajson);
+            }
+            foreach (ModelAmShortReport report in reportlist)
+            {
+                string outputfilepath = getAmShortOutputPath(report.reportTitle, publishdate);
+                if (File.Exists(outputfilepath))
+                {
+                    FileInfo fileinfo = new FileInfo(outputfilepath);
+                    DateTime modified = fileinfo.LastWriteTime;
+                    report.reportStatus = "done";
+                    report.reportStatusDesc = "完成于" + modified.ToString("yyyy年MM月dd日HH时mm分ss秒");
+                }
+            }
+            return JsonConvert.SerializeObject(reportlist);
+        }
+
+        [WebMethod]
+        public string GenerateAmShortReport(DateTime publishdate, string datajson)
+        {
+            List<ModelAmShortReport> reportlist = new List<ModelAmShortReport>();
+            if (datajson != "")
+            {
+                reportlist = JsonConvert.DeserializeObject<List<ModelAmShortReport>>(datajson);
+            }
+            foreach (ModelAmShortReport report in reportlist)
+            {
+                string output = createWordDoc(publishdate, report);
+                
+                if (output == "完成")
+                {
+                    report.reportStatus = "done";
+                    report.reportStatusDesc = "完成于" + DateTime.Now.ToString("yyyy年MM月dd日HH时mm分ss秒");
+                }
+                else
+                {
+                    report.reportStatus = "error";
+                    report.reportStatusDesc = output;
+                }
+            }
+            return JsonConvert.SerializeObject(reportlist);
+        }
+
+        [WebMethod]
         public string DevTest()
         {
-            string sqlselect = "select * from Tblyrbhwindwave72hforecasttwo "
-                        + " where FORECASTDATE > to_date('" + DateTime.Now.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')"
-                        + " and FORECASTDATE < to_date('" + DateTime.Now.AddDays(4).ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')"
-                        + " and PUBLISHDATE=to_date('" + DateTime.Now.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
-            DataTable dtselect = queryData(sqlselect);
-
-            return DataTableToJson(dtselect);
+            return "";
         }
 
         [WebMethod]
@@ -1530,6 +1576,116 @@ namespace PredicTable
 
         #endregion
 
+        #region 上午短期预报 生成Word方法
+        private string createWordDoc(DateTime publishdate, ModelAmShortReport report)
+        {
+            string templatepath = getAMShortTemplatePath(report.reportTitle);
+            string folderpath = Path.GetDirectoryName(templatepath);
+            if (!Directory.Exists(folderpath))
+            {
+                System.Diagnostics.Debug.WriteLine("模板文件夹不存在");
+                Directory.CreateDirectory(folderpath);
+            }
+            if (!File.Exists(templatepath))
+            {
+                System.Diagnostics.Debug.WriteLine("模板文件不存在");
+                return "找不到模板文件";
+            }
+            Document document = new Document();
+            try
+            {
+                document.LoadFromFile(templatepath);
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return "模板文件被占用";
+            }
+
+            List<bool> boollist = new List<bool>() { true };
+            foreach (int number in report.datasource)
+            {
+                switch (number)
+                {
+                    case 0:
+                        List<ModelPublishMetaInfo> table0 = getPublishMetaInfo(publishdate, boollist, 0);
+                        replaceDocComments(table0, document);
+                        break;
+                    case 1:
+                        List<ModelAmShort1> table1 = getAmShort1(publishdate, boollist, 0);
+                        replaceDocComments(table1, document);
+                        break;
+                    case 2:
+                        List<ModelAmShort2> table2 = getAmShort2(publishdate, boollist, 0);
+                        replaceDocComments(table2, document);
+                        break;
+                    case 3:
+                        List<ModelAmShort3and4> table3 = getAmShort3and4(publishdate, boollist, 0);
+                        replaceDocComments(table3, document);
+                        break;
+                    case 5:
+                        List<ModelAmShort5> table5 = getAmShort5(publishdate, boollist, 0);
+                        replaceDocComments(table5, document);
+                        break;
+                    case 6:
+                        List<ModelAmShort6> table6 = getAmShort6(publishdate, boollist, 0);
+                        replaceDocComments(table6, document);
+                        break;
+                    case 7:
+                        List<ModelAmShort7> table7 = getAmShort7(publishdate, boollist, 0);
+                        replaceDocComments(table7, document);
+                        break;
+                    case 8:
+                        List<ModelAmShort8> table8 = getAmShort8(publishdate, boollist, 0);
+                        replaceDocComments(table8, document);
+                        break;
+                    case 9:
+                        List<ModelAmShort9> table9 = getAmShort9(publishdate, boollist, 0);
+                        replaceDocComments(table9, document);
+                        break;
+                    case 10:
+                        List<ModelAmShort10> table10 = getAmShort10(publishdate, boollist, 0);
+                        replaceDocComments(table10, document);
+                        break;
+                    case 11:
+                        List<ModelAmShort11> table11 = getAmShort11(publishdate, boollist, 0);
+                        replaceDocComments(table11, document);
+                        break;
+                    case 12:
+                        List<ModelAmShort12> table12 = getAmShort12(publishdate, boollist, 0);
+                        replaceDocComments(table12, document);
+                        break;
+                    default: break;
+                }
+            }
+            
+            string outputfilepath = getAmShortOutputPath(report.reportTitle, publishdate);
+            string outputfolderpath = Path.GetDirectoryName(outputfilepath);
+            if (!Directory.Exists(outputfolderpath))
+            {
+                System.Diagnostics.Debug.WriteLine("输出文件夹不存在");
+                Directory.CreateDirectory(outputfolderpath);
+            }
+            try
+            {
+                document.SaveToFile(outputfilepath, FileFormat.Docx);
+            }
+            catch(Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return "输出文件时出错";
+            }
+
+            System.Drawing.Image[] images = document.SaveToImages(global::Spire.Doc.Documents.ImageType.Metafile);
+            for (int i = 0; i < images.Length; i++)
+            {
+                images[i].Save(Path.Combine(outputfolderpath, "生成的预报单4_" + i + ".jpg"), System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
+            return "完成";
+        }
+
+        #endregion
+
         #region Helper Methods
         private void fillModelAmShort2List(List<ModelAmShort2> list, int index, DataRow datarow)
         {
@@ -1726,6 +1882,208 @@ namespace PredicTable
                 // result.Add(p);
             }
             return result;
+        }
+
+        private string getAMShortTemplatePath(string reporttitle)
+        {
+            string result = "";
+            string folderpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WebServiceClass", "WordTemplates", "AMShort");
+
+            switch (reporttitle)
+            {
+                case "4号预报单(a4)-2014":
+                    result = Path.Combine(folderpath, "4号预报单.docx");
+                    break;
+                case "5号预报单（a4）":
+                    result = Path.Combine(folderpath, "5号预报单.doc");
+                    break;
+                case "6号预报单（a4）":
+                    result = Path.Combine(folderpath, "6号预报单.doc");
+                    break;
+                case "7号海洋水温海冰预报":
+                    result = Path.Combine(folderpath, "7号海洋水温海冰预报.doc");
+                    break;
+                case "20号潍坊市海洋预报台专项预报(10时)":
+                    result = Path.Combine(folderpath, "20号潍坊市海洋预报台专项预报.doc");
+                    break;
+                case "24号东营专项预报":
+                    result = Path.Combine(folderpath, "24号东营近海.doc");
+                    break;
+                case "26号预报单":
+                    result = Path.Combine(folderpath, "26号预报单.doc");
+                    break;
+                case "海上丝绸之路预报":
+                    result = Path.Combine(folderpath, "海上丝绸之路.doc");
+                    break;
+                case "上午的指挥处预报":
+                    result = Path.Combine(folderpath, "指挥处预报单.doc");
+                    break;
+                case "海阳近岸专项预报单":
+                    result = Path.Combine(folderpath, "海阳近岸专项预报单.doc");
+                    break;
+                default: break;
+            }
+            return result;
+        }
+
+        private string getAmShortOutputPath(string reporttitle, DateTime publishdate)
+        {
+            string result = "";
+            string folderpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "预报单共享", "duanqi", publishdate.Year.ToString() + publishdate.Month.ToString() + publishdate.Day.ToString());
+
+            switch (reporttitle)
+            {
+                case "4号预报单(a4)-2014":
+                    result = Path.Combine(folderpath, "4号预报单.docx");
+                    break;
+                case "5号预报单（a4）":
+                    result = Path.Combine(folderpath, "5号预报单.doc");
+                    break;
+                case "6号预报单（a4）":
+                    result = Path.Combine(folderpath, "6号预报单.doc");
+                    break;
+                case "7号海洋水温海冰预报":
+                    result = Path.Combine(folderpath, "7号海洋水温海冰预报.doc");
+                    break;
+                case "20号潍坊市海洋预报台专项预报(10时)":
+                    result = Path.Combine(folderpath, "20号潍坊市海洋预报台专项预报.doc");
+                    break;
+                case "24号东营专项预报":
+                    result = Path.Combine(folderpath, "24号东营近海.doc");
+                    break;
+                case "26号预报单":
+                    result = Path.Combine(folderpath, "26号预报单.doc");
+                    break;
+                case "海上丝绸之路预报":
+                    result = Path.Combine(folderpath, "海上丝绸之路.doc");
+                    break;
+                case "上午的指挥处预报":
+                    result = Path.Combine(folderpath, "指挥处预报单.doc");
+                    break;
+                case "海阳近岸专项预报单":
+                    result = Path.Combine(folderpath, "海阳近岸专项预报单.doc");
+                    break;
+                default: break;
+            }
+            return result;
+        }
+
+        private void replaceDocComments<T>(List<T> table, Document document) where T : class
+        {
+            List<DateTime> forecastdatelist = new List<DateTime>();
+            foreach (T data in table)
+            {
+                PropertyInfo fdate = typeof(T).GetProperty("FORECASTDATE");
+                if (fdate != null)
+                {
+                    forecastdatelist.Add(Convert.ToDateTime(fdate.GetValue(data, null)));
+                }
+            }
+            if (forecastdatelist.Count > 0)
+            {
+                forecastdatelist = forecastdatelist.Distinct().ToList();
+                forecastdatelist.Sort();
+            }
+            else
+            {
+                PropertyInfo fdate = typeof(T).GetProperty("PUBLISHDATE");
+                DateTime pubdate = Convert.ToDateTime(fdate.GetValue(table[0], null));
+                forecastdatelist.Add(pubdate.AddDays(1));
+                forecastdatelist.Add(pubdate.AddDays(2));
+                forecastdatelist.Add(pubdate.AddDays(3));
+            }
+            foreach (global::Spire.Doc.Fields.Comment comment in document.Comments)
+            {
+                string property = comment.Body.Paragraphs[0].Text;
+                string tablename = comment.Body.Paragraphs[1].Text;
+                string day = comment.Body.Paragraphs[2].Text;
+                DateTime forecastdate;
+                switch (day)
+                {
+                    case "DAY1":
+                        forecastdate = forecastdatelist[0];
+                        break;
+                    case "DAY2":
+                        forecastdate = forecastdatelist[1];
+                        break;
+                    case "DAY3":
+                        forecastdate = forecastdatelist[2];
+                        break;
+                    default:
+                        forecastdate = forecastdatelist[0];
+                        break;
+                }
+                string area = comment.Body.Paragraphs[3].Text;
+                string areakey = "";
+                string areavalue = "";
+                if (area != "")
+                {
+                    areakey = area.Split('=')[0];
+                    areavalue = area.Split('=')[1];
+                }
+                foreach (T data in table)
+                {
+                    Type type = typeof(T);
+                    string typename = type.Name;
+                    PropertyInfo FORECASTDATE = type.GetProperty("FORECASTDATE");
+                    PropertyInfo FORECASTAREA = type.GetProperty(areakey);
+                    PropertyInfo Target = type.GetProperty(property);
+                    bool typecorrect = false;
+                    bool datecorrect = false;
+                    bool areacorrect = false;
+                    if (typename == tablename)
+                    {
+                        typecorrect = true;
+                    }
+                    if (day == "")
+                    {
+                        datecorrect = true;
+                    }
+                    else if (FORECASTAREA == null)
+                    {
+                        datecorrect = true;
+                    }
+                    else if (Convert.ToDateTime(FORECASTDATE.GetValue(data, null)) == forecastdate)
+                    {
+                        datecorrect = true;
+                    }
+                    if (area == "")
+                    {
+                        areacorrect = true;
+                    }
+                    else if (FORECASTAREA == null)
+                    {
+                        areacorrect = true;
+                    }
+                    else if (FORECASTAREA.GetValue(data, null).ToString() == areavalue)
+                    {
+                        areacorrect = true;
+                    }
+                    if (typecorrect & datecorrect & areacorrect)
+                    {
+                        if (Target.Name == "FORECASTDATE")
+                        {
+                            DateTime datetime = (DateTime)(Target.GetValue(data, null));
+                            comment.OwnerParagraph.Text = datetime.Month + "月" + datetime.Day + "日";
+                        }
+                        else if (Target.Name == "PUBLISHDATE")
+                        {
+                            DateTime datetime = (DateTime)(Target.GetValue(data, null));
+                            string datestring = datetime.Year + "年" + datetime.Month + "月" + datetime.Day + "日";
+                            PropertyInfo PUBLISHHOUR = type.GetProperty("PUBLISHHOUR");
+                            if (PUBLISHHOUR != null)
+                            {
+                                datestring += PUBLISHHOUR.GetValue(data, null).ToString() + "时";
+                            }
+                            comment.OwnerParagraph.Text = datestring;
+                        }
+                        else
+                        {
+                            comment.OwnerParagraph.Text = Target.GetValue(data, null).ToString();
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
