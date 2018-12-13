@@ -31,18 +31,18 @@ namespace PredicTable
         public string GetAmShortTableData(DateTime date)
         {
             ModelAmShortResponse result = new ModelAmShortResponse();
-            result.AmShort1Data = getAmShort1(date, result.AmShortFakeData, 0);
-            result.AmShort2Data = getAmShort2(date, result.AmShortFakeData, 1);
-            result.AmShort3and4Data = getAmShort3and4(date, result.AmShortFakeData, 2);
-            result.AmShort5Data = getAmShort5(date, result.AmShortFakeData, 3);
-            result.AmShort6Data = getAmShort6(date, result.AmShortFakeData, 4);
-            result.AmShort7Data = getAmShort7(date, result.AmShortFakeData, 5);
-            result.AmShort8Data = getAmShort8(date, result.AmShortFakeData, 6);
-            result.AmShort9Data = getAmShort9(date, result.AmShortFakeData, 7);
-            result.AmShort10Data = getAmShort10(date, result.AmShortFakeData, 8);
-            result.AmShort11Data = getAmShort11(date, result.AmShortFakeData, 9);
-            result.AmShort12Data = getAmShort12(date, result.AmShortFakeData, 10);
-            result.PublishMetaInfo = getPublishMetaInfo(date, result.AmShortFakeData, 11);
+            result.AmShort1Data = getAmShort1(date, result.AmShortFakeData, 1);
+            result.AmShort2Data = getAmShort2(date, result.AmShortFakeData, 2);
+            result.AmShort3and4Data = getAmShort3and4(date, result.AmShortFakeData, 3);
+            result.AmShort5Data = getAmShort5(date, result.AmShortFakeData, 5);
+            result.AmShort6Data = getAmShort6(date, result.AmShortFakeData, 6);
+            result.AmShort7Data = getAmShort7(date, result.AmShortFakeData, 7);
+            result.AmShort8Data = getAmShort8(date, result.AmShortFakeData, 8);
+            result.AmShort9Data = getAmShort9(date, result.AmShortFakeData, 9);
+            result.AmShort10Data = getAmShort10(date, result.AmShortFakeData, 10);
+            result.AmShort11Data = getAmShort11(date, result.AmShortFakeData, 11);
+            result.AmShort12Data = getAmShort12(date, result.AmShortFakeData, 12);
+            result.PublishMetaInfo = getPublishMetaInfo(date, result.AmShortFakeData, 0);
 
             return JsonConvert.SerializeObject(result);
         }
@@ -297,6 +297,13 @@ namespace PredicTable
                 }
             }
             result.Sort(new ModelAmShort1Comparer());
+            foreach (ModelAmShort1 data in result)
+            {
+                if (data.REPORTAREA == "渤海")
+                {
+                    data.YRBHWWFWATERTEMPERATURE = "-";
+                }
+            }
             fakedatalist[fakedataindex] = fake;
             return result;
         }
