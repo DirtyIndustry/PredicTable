@@ -102,7 +102,7 @@ namespace PredicTable
         }
 
         [WebMethod]
-        public string GetAmShortReportStatus(DateTime publishdate, string datajson)
+        public string GetAmShortReportStatus(DateTime publishdate, int publishhour, string datajson)
         {
             List<ModelAmShortReport> reportlist = new List<ModelAmShortReport>();
             if (datajson != "")
@@ -111,7 +111,7 @@ namespace PredicTable
             }
             foreach (ModelAmShortReport report in reportlist)
             {
-                string outputfilepath = getAmShortOutputPath(report.reportTitle, publishdate);
+                string outputfilepath = getAmShortOutputPath(report.reportTitle, publishdate, publishhour);
                 if (File.Exists(outputfilepath))
                 {
                     FileInfo fileinfo = new FileInfo(outputfilepath);
@@ -124,7 +124,7 @@ namespace PredicTable
         }
 
         [WebMethod]
-        public string GenerateAmShortReport(DateTime publishdate, string datajson)
+        public string GenerateAmShortReport(DateTime publishdate, int publishhour, string datajson)
         {
             List<ModelAmShortReport> reportlist = new List<ModelAmShortReport>();
             if (datajson != "")
@@ -133,17 +133,20 @@ namespace PredicTable
             }
             foreach (ModelAmShortReport report in reportlist)
             {
-                string output = createWordDoc(publishdate, report);
-                
-                if (output == "完成")
+                if (report.selected)
                 {
-                    report.reportStatus = "done";
-                    report.reportStatusDesc = "完成于" + DateTime.Now.ToString("yyyy年MM月dd日HH时mm分ss秒");
-                }
-                else
-                {
-                    report.reportStatus = "error";
-                    report.reportStatusDesc = output;
+                    string output = createWordDoc(publishdate, publishhour, report);
+
+                    if (output == "完成")
+                    {
+                        report.reportStatus = "done";
+                        report.reportStatusDesc = "完成于" + DateTime.Now.ToString("yyyy年MM月dd日HH时mm分ss秒");
+                    }
+                    else
+                    {
+                        report.reportStatus = "error";
+                        report.reportStatusDesc = output;
+                    }
                 }
             }
             return JsonConvert.SerializeObject(reportlist);
@@ -997,10 +1000,11 @@ namespace PredicTable
             result.Add(new ModelPublishMetaInfo(pubdate));
             string sql = "select * from TBLFOOTER where PUBLISHDATE=to_date('" + pubdate.ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
             DataTable dt = queryData(sql);
+            string sqlyesterday = "select * from TBLFOOTER where PUBLISHDATE=to_date('" + pubdate.AddDays(-1).ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
+            DataTable dtyesterday = queryData(sqlyesterday);
             if (dt.Rows.Count == 0)
             {
-                sql = "select * from TBLFOOTER where PUBLISHDATE=to_date('" + pubdate.AddDays(-1).ToString("yyyy-MM-dd") + "', 'yyyy-mm-dd hh24@mi@ss')";
-                dt = queryData(sql);
+                dt = dtyesterday;
                 fake = true;
             }
             if (dt.Rows.Count > 0)
@@ -1018,6 +1022,28 @@ namespace PredicTable
                 result[0].PUBLISHHOUR = sqldatalist[0].PUBLISHHOUR;
                 result[0].SENDTEL = sqldatalist[0].SENDTEL;
                 result[0].ZHIBANTEL = sqldatalist[0].ZHIBANTEL;
+            }
+            if (dtyesterday.Rows.Count > 0)
+            {
+                List<ModelPublishMetaInfo> yesterdaydatalist = TableToList<ModelPublishMetaInfo>(dtyesterday);
+                if (result[0].FTIDALFORECASTER == "" & result[0].FTIDALFORECASTERTEL == "")
+                {
+                    result[0].FTIDALFORECASTER = yesterdaydatalist[0].FTIDALFORECASTER;
+                    result[0].FTIDALFORECASTERTEL = yesterdaydatalist[0].FTIDALFORECASTERTEL;
+                    fake = true;
+                }
+                if (result[0].FWATERTEMPERATUREFORECASTER == "" & result[0].FWATERTEMPERATUREFORECASTERTEL == "")
+                {
+                    result[0].FWATERTEMPERATUREFORECASTER = yesterdaydatalist[0].FWATERTEMPERATUREFORECASTER;
+                    result[0].FWATERTEMPERATUREFORECASTERTEL = yesterdaydatalist[0].FWATERTEMPERATUREFORECASTERTEL;
+                    fake = true;
+                }
+                if (result[0].FWAVEFORECASTER == "" & result[0].FWAVEFORECASTERTEL == "")
+                {
+                    result[0].FWAVEFORECASTER = yesterdaydatalist[0].FWAVEFORECASTER;
+                    result[0].FWAVEFORECASTERTEL = yesterdaydatalist[0].FWAVEFORECASTERTEL;
+                    fake = true;
+                }
             }
             fakedatalist[fakedataindex] = fake;
             return result;
@@ -1584,7 +1610,7 @@ namespace PredicTable
         #endregion
 
         #region 上午短期预报 生成Word方法
-        private string createWordDoc(DateTime publishdate, ModelAmShortReport report)
+        private string createWordDoc(DateTime publishdate, int publishhour, ModelAmShortReport report)
         {
             string templatepath = getAMShortTemplatePath(report.reportTitle);
             string folderpath = Path.GetDirectoryName(templatepath);
@@ -1666,7 +1692,7 @@ namespace PredicTable
                 }
             }
             
-            string outputfilepath = getAmShortOutputPath(report.reportTitle, publishdate);
+            string outputfilepath = getAmShortOutputPath(report.reportTitle, publishdate, publishhour);
             string outputfolderpath = Path.GetDirectoryName(outputfilepath);
             if (!Directory.Exists(outputfolderpath))
             {
@@ -1933,7 +1959,7 @@ namespace PredicTable
             return result;
         }
 
-        private string getAmShortOutputPath(string reporttitle, DateTime publishdate)
+        private string getAmShortOutputPath(string reporttitle, DateTime publishdate, int publishhour)
         {
             string result = "";
             string folderpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "预报单共享", "duanqi", publishdate.Year.ToString() + publishdate.Month.ToString() + publishdate.Day.ToString());
@@ -1941,7 +1967,7 @@ namespace PredicTable
             switch (reporttitle)
             {
                 case "4号预报单(a4)-2014":
-                    result = Path.Combine(folderpath, "4号预报单.docx");
+                    result = Path.Combine(folderpath, "YB_SLOF_ZX_72hr_" + publishdate.ToString("yyyyMMdd") + publishhour + "_NMFC.doc");
                     break;
                 case "5号预报单（a4）":
                     result = Path.Combine(folderpath, "5号预报单.doc");
@@ -1953,13 +1979,13 @@ namespace PredicTable
                     result = Path.Combine(folderpath, "7号海洋水温海冰预报.doc");
                     break;
                 case "20号潍坊市海洋预报台专项预报(10时)":
-                    result = Path.Combine(folderpath, "20号潍坊市海洋预报台专项预报.doc");
+                    result = Path.Combine(folderpath, "YB_WF_YBTZX_24hr_" + publishdate.ToString("yyyyMMdd") + publishhour + "_NMFC.doc");
                     break;
                 case "24号东营专项预报":
-                    result = Path.Combine(folderpath, "24号东营近海.doc");
+                    result = Path.Combine(folderpath, "YB_DY_ZX_24hr_" + publishdate.ToString("yyyyMMdd") + publishhour + "_NMFC.doc");
                     break;
                 case "26号预报单":
-                    result = Path.Combine(folderpath, "26号预报单.doc");
+                    result = Path.Combine(folderpath, "YB_DY_SXGZX_72hr_" + publishdate.ToString("yyyyMMdd") + publishhour + "_NMFC.doc");
                     break;
                 case "海上丝绸之路预报":
                     result = Path.Combine(folderpath, "海上丝绸之路.doc");
@@ -1968,7 +1994,7 @@ namespace PredicTable
                     result = Path.Combine(folderpath, "指挥处预报单.doc");
                     break;
                 case "海阳近岸专项预报单":
-                    result = Path.Combine(folderpath, "海阳近岸专项预报单.doc");
+                    result = Path.Combine(folderpath, "YB_HY_ZX_24hr_" + publishdate.ToString("yyyyMMdd") + publishhour + "_NMFC.doc");
                     break;
                 default: break;
             }

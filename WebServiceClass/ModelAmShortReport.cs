@@ -11,6 +11,7 @@ namespace PredicTable.WebServiceClass
         public string reportTitle { get; set; } = "";
         public string reportStatusDesc { get; set; } = "";
         public bool reportButtonDisable { get; set; } = false;
+        public bool selected { get; set; } = true;
         public List<int> datasource { get; set; } = new List<int>();
     }
 }
