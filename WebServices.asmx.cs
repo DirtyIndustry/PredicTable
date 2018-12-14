@@ -1642,50 +1642,67 @@ namespace PredicTable
                 {
                     case 0:
                         List<ModelPublishMetaInfo> table0 = getPublishMetaInfo(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table0, document);
                         replaceDocComments(table0, document);
                         break;
                     case 1:
                         List<ModelAmShort1> table1 = getAmShort1(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table1, document);
                         replaceDocComments(table1, document);
                         break;
                     case 2:
                         List<ModelAmShort2> table2 = getAmShort2(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table2, document);
                         replaceDocComments(table2, document);
                         break;
                     case 3:
                         List<ModelAmShort3and4> table3 = getAmShort3and4(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table3, document);
                         replaceDocComments(table3, document);
+                        break;
+                    case 4:
+                        List<ModelAmShort3and4> table4 = getAmShort3and4(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table4, document);
+                        replaceDocComments(table4, document);
                         break;
                     case 5:
                         List<ModelAmShort5> table5 = getAmShort5(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table5, document);
                         replaceDocComments(table5, document);
                         break;
                     case 6:
                         List<ModelAmShort6> table6 = getAmShort6(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table6, document);
                         replaceDocComments(table6, document);
                         break;
                     case 7:
                         List<ModelAmShort7> table7 = getAmShort7(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table7, document);
                         replaceDocComments(table7, document);
                         break;
                     case 8:
                         List<ModelAmShort8> table8 = getAmShort8(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table8, document);
                         replaceDocComments(table8, document);
                         break;
                     case 9:
                         List<ModelAmShort9> table9 = getAmShort9(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table9, document);
                         replaceDocComments(table9, document);
                         break;
                     case 10:
                         List<ModelAmShort10> table10 = getAmShort10(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table10, document);
                         replaceDocComments(table10, document);
                         break;
                     case 11:
                         List<ModelAmShort11> table11 = getAmShort11(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table11, document);
                         replaceDocComments(table11, document);
                         break;
                     case 12:
                         List<ModelAmShort12> table12 = getAmShort12(publishdate, boollist, 0);
+                        replaceDocStringMarkers(table12, document);
                         replaceDocComments(table12, document);
                         break;
                     default: break;
@@ -1709,11 +1726,11 @@ namespace PredicTable
                 return "输出文件时出错";
             }
 
-            System.Drawing.Image[] images = document.SaveToImages(global::Spire.Doc.Documents.ImageType.Metafile);
-            for (int i = 0; i < images.Length; i++)
-            {
-                images[i].Save(Path.Combine(outputfolderpath, "生成的预报单4_" + i + ".jpg"), System.Drawing.Imaging.ImageFormat.Jpeg);
-            }
+            //System.Drawing.Image[] images = document.SaveToImages(global::Spire.Doc.Documents.ImageType.Metafile);
+            //for (int i = 0; i < images.Length; i++)
+            //{
+            //    images[i].Save(Path.Combine(outputfolderpath, "生成的预报单4_" + i + ".jpg"), System.Drawing.Imaging.ImageFormat.Jpeg);
+            //}
             return "完成";
         }
 
@@ -1937,13 +1954,13 @@ namespace PredicTable
                     result = Path.Combine(folderpath, "7号海洋水温海冰预报.doc");
                     break;
                 case "20号潍坊市海洋预报台专项预报(10时)":
-                    result = Path.Combine(folderpath, "20号潍坊市海洋预报台专项预报.doc");
+                    result = Path.Combine(folderpath, "20号潍坊市海洋预报台专项预报.docx");
                     break;
                 case "24号东营专项预报":
-                    result = Path.Combine(folderpath, "24号东营近海.doc");
+                    result = Path.Combine(folderpath, "24号东营近海.docx");
                     break;
                 case "26号预报单":
-                    result = Path.Combine(folderpath, "26号预报单.doc");
+                    result = Path.Combine(folderpath, "26号预报单.docx");
                     break;
                 case "海上丝绸之路预报":
                     result = Path.Combine(folderpath, "海上丝绸之路.doc");
@@ -1963,6 +1980,8 @@ namespace PredicTable
         {
             string result = "";
             string folderpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "预报单共享", "duanqi", publishdate.Year.ToString() + publishdate.Month.ToString() + publishdate.Day.ToString());
+            string zhihuichufolderpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "预报单共享", "指挥处预报", "上午");
+            string sichouzhilufolderpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "预报单共享", "海上丝绸之路", publishdate.Year.ToString() + publishdate.Month.ToString() + publishdate.Day.ToString());
 
             switch (reporttitle)
             {
@@ -1970,13 +1989,13 @@ namespace PredicTable
                     result = Path.Combine(folderpath, "YB_SLOF_ZX_72hr_" + publishdate.ToString("yyyyMMdd") + publishhour + "_NMFC.doc");
                     break;
                 case "5号预报单（a4）":
-                    result = Path.Combine(folderpath, "5号预报单.doc");
+                    result = Path.Combine(folderpath, "YB_SLOF_ZX_7day_" + publishdate.ToString("yyyyMMdd") + "_NMFC.doc");
                     break;
                 case "6号预报单（a4）":
-                    result = Path.Combine(folderpath, "6号预报单.doc");
+                    result = Path.Combine(folderpath, "YB_SLOF_CXZX_7day_" + publishdate.ToString("yyyyMMdd") + "_NMFC.doc");
                     break;
                 case "7号海洋水温海冰预报":
-                    result = Path.Combine(folderpath, "7号海洋水温海冰预报.doc");
+                    result = Path.Combine(folderpath, "YB_SLOF_HBHWZX_7day_" + publishdate.ToString("yyyyMMdd") + "_NMFC.doc");
                     break;
                 case "20号潍坊市海洋预报台专项预报(10时)":
                     result = Path.Combine(folderpath, "YB_WF_YBTZX_24hr_" + publishdate.ToString("yyyyMMdd") + publishhour + "_NMFC.doc");
@@ -1988,10 +2007,10 @@ namespace PredicTable
                     result = Path.Combine(folderpath, "YB_DY_SXGZX_72hr_" + publishdate.ToString("yyyyMMdd") + publishhour + "_NMFC.doc");
                     break;
                 case "海上丝绸之路预报":
-                    result = Path.Combine(folderpath, "海上丝绸之路.doc");
+                    result = Path.Combine(sichouzhilufolderpath, "YB_SS_ZX_72hr_" + publishdate.ToString("yyyyMMdd") + "_NMFC.doc");
                     break;
                 case "上午的指挥处预报":
-                    result = Path.Combine(folderpath, "指挥处预报单.doc");
+                    result = Path.Combine(zhihuichufolderpath, "YB_ZHC_ZX_72hr_" + publishdate.ToString("yyyyMMdd") + publishhour + "_NMFC.doc");
                     break;
                 case "海阳近岸专项预报单":
                     result = Path.Combine(folderpath, "YB_HY_ZX_24hr_" + publishdate.ToString("yyyyMMdd") + publishhour + "_NMFC.doc");
@@ -1999,6 +2018,28 @@ namespace PredicTable
                 default: break;
             }
             return result;
+        }
+
+        private void replaceDocStringMarkers<T>(List<T> table, Document document) where T : class
+        {
+            foreach(T data in table)
+            {
+                Type type = typeof(T);
+                string typename = type.Name;
+                foreach(PropertyInfo pi in type.GetProperties())
+                {
+                    if (pi.Name == "PUBLISHDATE")
+                    {
+                        System.Diagnostics.Debug.WriteLine("GOGOGOGOGO!");
+                        DateTime pubdate = Convert.ToDateTime(pi.GetValue(data, null));
+                        document.Replace("{yyyy年MM月dd日}", pubdate.ToString("yyyy年MM月dd日"), true, false);
+                    }
+                    else
+                    {
+                        document.Replace("{" + pi.Name + "}", pi.GetValue(data, null).ToString(), true, true);
+                    }
+                }
+            }
         }
 
         private void replaceDocComments<T>(List<T> table, Document document) where T : class
@@ -2112,7 +2153,15 @@ namespace PredicTable
                         }
                         else
                         {
-                            comment.OwnerParagraph.Text = Target.GetValue(data, null).ToString();
+                            try
+                            {
+                                comment.OwnerParagraph.Text = Target.GetValue(data, null).ToString();
+                            }
+                            catch(Exception e)
+                            {
+                                System.Diagnostics.Debug.WriteLine(e);
+                            }
+                            // comment.OwnerParagraph.Replace("{a}", Target.GetValue(data, null).ToString(), false, false);
                         }
                     }
                 }
