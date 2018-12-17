@@ -11,6 +11,6 @@ namespace PredicTable.WebServiceClass
         public string Description { get; set; } = "";
         public int AffectedRowCount { get; set; } = 0;
         public List<object> NewData { get; set; } = new List<object>();
-        public bool NewFakeData { get; set; } = false;
+        public int NewFakeData { get; set; } = 0;
     }
 }

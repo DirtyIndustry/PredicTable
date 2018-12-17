@@ -2984,6 +2984,7 @@
     <Compile Include="WebForm2.aspx.designer.cs">
       <DependentUpon>WebForm2.aspx</DependentUpon>
     </Compile>
+    <Compile Include="WebServiceClass\FuncAmShort.cs" />
     <Compile Include="WebServiceClass\ModelAmShort1.cs" />
     <Compile Include="WebServiceClass\ModelAmShort10.cs" />
     <Compile Include="WebServiceClass\ModelAmShort11.cs" />
@@ -3003,6 +3004,8 @@
     <Compile Include="WebServiceClass\ModelAmShortResponse.cs" />
     <Compile Include="WebServiceClass\ModelEditResponse.cs" />
     <Compile Include="WebServiceClass\ModelPublishMetaInfo.cs" />
+    <Compile Include="WebServiceClass\OperatorDOC.cs" />
+    <Compile Include="WebServiceClass\OperatorSQL.cs" />
     <Compile Include="WebServiceClass\SoapAddressReflector.cs" />
     <Compile Include="WebServices.asmx.cs">
       <DependentUpon>WebServices.asmx</DependentUpon>

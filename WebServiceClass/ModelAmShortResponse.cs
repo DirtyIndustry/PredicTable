@@ -4,7 +4,7 @@ namespace PredicTable.WebServiceClass
 {
     public class ModelAmShortResponse
     {
-        public List<bool> AmShortFakeData { get; set; } = new List<bool>() { false, false, false, false, false, false, false, false, false, false, false, false, false };
+        public List<int> AmShortFakeData { get; set; } = new List<int>() { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         public List<ModelAmShort1> AmShort1Data { get; set; } = new List<ModelAmShort1>();
         public List<ModelAmShort2> AmShort2Data { get; set; } = new List<ModelAmShort2>();
         public List<ModelAmShort3and4> AmShort3and4Data { get; set; } = new List<ModelAmShort3and4>();
