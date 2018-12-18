@@ -1746,6 +1746,7 @@
     <Content Include="Ajax\SCOSpecialTableList.ashx" />
     <Content Include="Ajax\gettablelistcx.ashx" />
     <Content Include="Ajax\NewMediumAndLongHBUploader.ashx" />
+    <Content Include="Ajax\UploadTideTianjin.ashx" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\1234.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
@@ -2239,6 +2240,9 @@
     </Compile>
     <Compile Include="Ajax\UpLoadModelInfo.ashx.cs">
       <DependentUpon>UpLoadModelInfo.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Ajax\UploadTideTianjin.ashx.cs">
+      <DependentUpon>UploadTideTianjin.ashx</DependentUpon>
     </Compile>
     <Compile Include="Ajax\UpTideData.ashx.cs">
       <DependentUpon>UpTideData.ashx</DependentUpon>
@@ -3004,8 +3008,11 @@
     <Compile Include="WebServiceClass\ModelAmShortResponse.cs" />
     <Compile Include="WebServiceClass\ModelEditResponse.cs" />
     <Compile Include="WebServiceClass\ModelPublishMetaInfo.cs" />
+    <Compile Include="WebServiceClass\ModelUploadResponse.cs" />
+    <Compile Include="WebServiceClass\ModelUploadTide.cs" />
     <Compile Include="WebServiceClass\OperatorDOC.cs" />
     <Compile Include="WebServiceClass\OperatorSQL.cs" />
+    <Compile Include="WebServiceClass\OperatorTXT.cs" />
     <Compile Include="WebServiceClass\SoapAddressReflector.cs" />
     <Compile Include="WebServices.asmx.cs">
       <DependentUpon>WebServices.asmx</DependentUpon>

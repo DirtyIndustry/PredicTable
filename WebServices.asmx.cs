@@ -438,16 +438,12 @@ namespace PredicTable
             }
             return JsonConvert.SerializeObject(reportlist);
         }
-
-        public class uploadfile
-        {
-            public byte[] file;
-        }
+        
         [WebMethod]
         public string UploadTideDataTianjin(byte[] file, string filename)
         {
             System.Diagnostics.Debug.WriteLine(file);
-            string folderpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TempUploadedFiles");
+            string folderpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UploadFiles", "tidedata");
             if (!Directory.Exists(folderpath))
             {
                 Directory.CreateDirectory(folderpath);

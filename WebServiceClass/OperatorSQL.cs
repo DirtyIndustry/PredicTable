@@ -43,13 +43,17 @@ namespace PredicTable.WebServiceClass
             return result;
         }
 
-        public static DataTable queryData(string sql, DbConnection connection)
+        public static DataTable queryData(string sql, List<DbParameter> parameters, DbConnection connection)
         {
             DataTable result = new DataTable();
             string ConnectionStr = ConfigurationManager.ConnectionStrings["DataBaseCon"].ConnectionString;
             DbProviderFactory provider = DbProviderFactories.GetFactory(ConfigurationManager.ConnectionStrings["DataBaseCon"].ProviderName);
             DbCommand command = provider.CreateCommand();
             command.Connection = connection;
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                sql = sql.Replace("'" + parameters[i].ParameterName + "'", "'" + parameters[i].Value.ToString() + "'");
+            }
             command.CommandText = sql;
             DbDataAdapter adapter = provider.CreateDataAdapter();
             try
@@ -120,6 +124,39 @@ namespace PredicTable.WebServiceClass
             {
                 command.Dispose();
                 conn.Close();
+            }
+            return result;
+        }
+
+        public static int executeSql(string sql, List<DbParameter> parameters, DbConnection connection)
+        {
+            int result = 0;
+
+            string ConnectionStr = ConfigurationManager.ConnectionStrings["DataBaseCon"].ConnectionString;
+            DbProviderFactory Provider = DbProviderFactories.GetFactory(ConfigurationManager.ConnectionStrings["DataBaseCon"].ProviderName);
+            //DbConnection conn = Provider.CreateConnection();
+            //conn.ConnectionString = ConnectionStr;
+            DbCommand command = Provider.CreateCommand();
+            command.Connection = connection;
+            command.CommandType = CommandType.Text;
+            command.Parameters.Clear();
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                sql = sql.Replace("'" + parameters[i].ParameterName + "'", "'" + parameters[i].Value.ToString() + "'");
+            }
+            command.CommandText = sql;
+
+            try
+            {
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+            finally
+            {
+                command.Dispose();
             }
             return result;
         }
